@@ -3,41 +3,43 @@ session_start();
 include ('../../config/config.php');
 
 // Check if the employee ID is stored in session
-if (isset($_SESSION['empid'])) {
-    $empid = $_SESSION['empid'];
+if (isset($_SESSION['empUsername'])) {
+    $empUsername = $_SESSION['empUsername'];
 
     if ($_SERVER['REQUEST_METHOD'] == "POST") {
         // Fetch POST data with null coalescing to avoid undefined array key warnings
-        $parcelid = $_POST['parcelid'] ?? null;
+        $trackingNumber = $_POST['trackingNumber'] ?? null;
         $size = $_POST['size'] ?? null;
         $status = $_POST['status'] ?? null;
+        $payStatus = $_POST['payStatus'] ?? null;
 
-        // Check if the parcelid exists in the parcel table
-        $stmt_check_parcel = $con->prepare("SELECT parcelid FROM parcel WHERE parcelid = ?");
-        $stmt_check_parcel->bind_param("s", $parcelid);
+        // Check if the tracking number exists in the parcel table
+        $stmt_check_parcel = $con->prepare("SELECT trackingNumber FROM parcel WHERE trackingNumber = ?");
+        $stmt_check_parcel->bind_param("s", $trackingNumber);
         $stmt_check_parcel->execute();
         $result = $stmt_check_parcel->get_result();
 
         if ($result->num_rows > 0) {
             // Update the parcel table
-            $stmt_parcel = $con->prepare("UPDATE parcel SET size = ?, status = ?, empid = ? WHERE parcelid = ?");
-            $stmt_parcel->bind_param("ssss", $size, $status, $empid, $parcelid);
+            $stmt_parcel = $con->prepare("UPDATE parcel SET size = ?, status = ?, payStatus = ?, empid = ? WHERE trackingNumber = ?");
+            $stmt_parcel->bind_param("sssss", $size, $status, $payStatus, $empid, $trackingNumber);
             $exec_parcel = $stmt_parcel->execute();
             $stmt_parcel->close();
 
             if ($exec_parcel === false) {
                 die('Execute failed for parcel update: ' . htmlspecialchars($con->error));
             }
+            
 
             echo "<script type='text/javascript'>alert('Successfully updated');</script>";
         } else {
-            echo "<script type='text/javascript'>alert('Invalid parcel ID');</script>";
+            echo "<script type='text/javascript'>alert('Invalid tracking number');</script>";
         }
 
         $stmt_check_parcel->close();
     }
 } else {
-    echo "<script type='text/javascript'>alert('No employee ID found in session. Please login again.');</script>";
+    echo "<script type='text/javascript'>alert('No employee Username found in session. Please login again.');</script>";
 }
 ?>
 
@@ -101,7 +103,7 @@ if (isset($_SESSION['empid'])) {
         .navbar ul {
             list-style: none;
             display: flex;
-            gap: 3rem;
+            gap: 8rem;
         }
 
         .navbar ul button {
@@ -219,9 +221,8 @@ if (isset($_SESSION['empid'])) {
         <div class="navbar">
             <img class="logo" src="../../pictures/logoParcel.png" alt="Logo">
             <ul>
-                <button type="button">UPDATE</button>
+                <li><a href="employeeupdate.php"><button type="button">UPDATE</button></a></li>
                 <button type="button">REMOVE</button>
-                <button type="button">SEARCH</button>
                 <button type="button">VIEWING</button>
                 <img class="image" src="../../pictures/home.png" alt="Home">
             </ul>
@@ -229,8 +230,8 @@ if (isset($_SESSION['empid'])) {
         <div class="form-container">
             <form action="../../pages/employee/employeeupdate.php" method="post" class="form-grid">
                 <div class="input-group">
-                    <input type="text" name="parcelid" required>
-                    <label for="parcelid">Parcel ID :</label>
+                    <input type="text" name="trackingNumber" required>
+                    <label for="trackingNumber">Tracking Number :</label>
                 </div>
                 <div class="input-group">
                     <select name="size" required>
@@ -249,6 +250,14 @@ if (isset($_SESSION['empid'])) {
                         <option value="delivered">Delivered</option>
                     </select>
                     <label for="status">Parcel Status :</label>
+                </div>
+                <div class="input-group">
+                    <select name="payStatus" required>
+                        <option value="" disabled selected>Select Payment Status</option>
+                        <option value="paid">PAID</option>
+                        <option value="unpaid">UNPAID</option>
+                    </select>
+                    <label for="payStatus">Payment Status :</label>
                 </div>
                 <div class="submit-btn">
                     <button type="submit">UPDATE</button>
