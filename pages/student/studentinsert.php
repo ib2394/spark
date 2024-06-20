@@ -1,18 +1,19 @@
 <?php
 session_start();
-include ('../../config/config.php');
+include("config.php");
 
 if ($_SERVER['REQUEST_METHOD'] == "POST") {
     // Retrieve the logged-in studid from the session
-    if (!isset($_SESSION['studid'])) {
+    if (!isset($_SESSION['studUsername'])) {
         echo "<script type='text/javascript'>alert('Student ID is not set in the session');</script>";
         exit();
     }
-    $studid = $_SESSION['studid'];
+    $studUsername = $_SESSION['studUsername'];
 
     $parcelid = $_POST['parcelid'];
     $courname = $_POST['courier_name'];
     $paymethod = $_POST['paymethod'];
+    $proof = $_FILES['proof']['tmp_name'];
 
     // Determine the payid based on the paymethod
     if ($paymethod == 'Cash') {
@@ -25,7 +26,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
     }
 
     // Check if the studid exists in the student table
-    $stmt_check_student = $con->prepare("SELECT studid FROM student WHERE studid = ?");
+    $stmt_check_student = $con->prepare("SELECT studid FROM student WHERE studid =?");
     $stmt_check_student->bind_param("s", $studid);
     $stmt_check_student->execute();
     $result_student = $stmt_check_student->get_result();
@@ -37,40 +38,41 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
     $stmt_check_student->close();
 
     // Insert the payment information (only if not already present)
-    $stmt_check_payment = $con->prepare("SELECT payid FROM payment WHERE payid = ? AND paymethod = ?");
+    $stmt_check_payment = $con->prepare("SELECT payid FROM payment WHERE payid =? AND paymethod =?");
     $stmt_check_payment->bind_param("ss", $payid, $paymethod);
     $stmt_check_payment->execute();
     $result_payment = $stmt_check_payment->get_result();
 
     if ($result_payment->num_rows == 0) {
         // Payment ID with the specific paymethod does not exist in the payment table, insert it
-        $stmt_insert_payment = $con->prepare("INSERT INTO payment (payid, paymethod) VALUES (?, ?)");
+        $stmt_insert_payment = $con->prepare("INSERT INTO payment (payid, paymethod) VALUES (?,?)");
         $stmt_insert_payment->bind_param("ss", $payid, $paymethod);
         $stmt_insert_payment->execute();
         $stmt_insert_payment->close();
     }
     $stmt_check_payment->close();
 
-    // Insert the data into the parcel table with the associated studid
-    $stmt_insert_parcel = $con->prepare("INSERT INTO parcel (parcelid, courname, studid, payid) VALUES (?, ?, ?, ?)");
-    if ($stmt_insert_parcel === false) {
-        die('Prepare failed: ' .htmlspecialchars($con->error));
+    // Get current date and time
+    $currentDate = date('Y-m-d');
+    $currentTime = date('H:i:s'); 
+
+    // File upload handling
+    $proof = null;
+    if (isset($_FILES['proof']['tmp_name']) &&!empty($_FILES['proof']['tmp_name'])) {
+        $proof = file_get_contents($_FILES['proof']['tmp_name']);
     }
 
-    // Bind parameters and execute the statement
-    $stmt_insert_parcel->bind_param("ssss", $parcelid, $courname, $studid, $payid);
-    $stmt_insert_parcel->execute();
-    $stmt_insert_parcel->close();
+     // Insert the data into the parcel table with the associated studid
+     $stmt_insert_parcel = $con->prepare("INSERT INTO parcel (parcelid, courname, payid, studid, date, time) VALUES (?,?,?,?,?,?)");
+     $stmt_insert_parcel->bind_param("ssssss", $parcelid, $courname, $payid, $studid, $currentDate, $currentTime);
+     $stmt_insert_parcel->execute();
+     $stmt_insert_parcel->close();
 
     echo "<script type='text/javascript'>alert('Successfully inserted');</script>";
 } else {
     echo "<script type='text/javascript'>alert('Please enter some valid information');</script>";
 }
 ?>
-
-
-
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -176,7 +178,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
             flex-direction: column;
         }
 
-        .input-group input[type="text"], .input-group select {
+        .input-group input[type="text"], .input-group select, .input-group input[type="file"] {
             padding: 0.75rem;
             border: 2px solid #333;
             border-radius: 4px;
@@ -245,19 +247,19 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
     <div class="banner">
         <h1>STUDENT</h1>
         <div class="navbar">
-            <img class="logo" src="../../pictures/logoParcel.png" alt="Logo">
+            <img class="logo" src="logo.png" alt="Logo">
             <ul>
-                <li><a href="../../pages/student/studentinsert.php"><button type="button">ADD PARCEL</button></a></li>
-                <li><a href="../../pages/student/studentupdate.php"><button type="button">EDIT PARCEL</button></a></li>
+                <li><a href="studentinsert.php"><button type="button">ADD PARCEL</button></a></li>
+                <li><a href="studentupdate.php"><button type="button">EDIT PARCEL</button></a></li>
                 <button type="button">REMOVE</button>
                 <button type="button">SEARCH</button>
                 <button type="button">VIEWING</button>
-                <img class="image" src="../../pictures/home.png" alt="Home">
+                <img class="image" src="home.png" alt="Home">
             </ul>
         </div>
     </div>
     <div class="form-container">
-        <form action="../../pages/student/studentinsert.php" method="post" class="form-grid">
+        <form action="studentinsert.php" method="post" class="form-grid">
             <div class="input-group">
                 <input type="text" name="parcelid" required>
                 <label for="parcelid">Parcel ID :</label>
@@ -281,8 +283,15 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
                 </select>
                 <label for="paymethod">Payment Method :</label>
             </div>
+            <div class="input-group">
+                <input type="file" name="proof" required>
+                <label for="proof">Payment Proof :</label>
+            </div>
             <div class="submit-btn">
                 <button type="submit">ADD</button>
+            </div>
+            <div class="submit-btn">
+                <li><a href="studentinsert.php"><button type="button">ADD MORE PARCEL</button></a></li>
             </div>
         </form>
     </div>
