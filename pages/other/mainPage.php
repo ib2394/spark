@@ -26,16 +26,17 @@
                 <h1>Welcome to SPARK</h1>
                 <div>
                     <a href="../../pages/other/loginAll.php">
-                    <button type="login">START</button> 
+                    <button type="login">Get Started</button> 
                 </div>
             </div>
         </div>
     </body>
 
     <body>
-      <div class="cointainer">
-        <div class="slides">
-          <h2>SPARK ready for you</h2>
+      <div class="body2">
+        <div class="slay">
+          <h2>Benefits For Spark Users</h2>
+          <h4>Spark provides UiTM Raub students with a highly convenient and efficient system for managing and receiving their parcels, ensuring a streamlined process that saves time and reduces hassle.</h4>
         </div>
       </div>
     

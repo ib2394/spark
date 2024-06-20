@@ -126,12 +126,11 @@ button:hover{
     color: #1daf;
     font-size: 18px;
 }
-.cointainer{
+.body2{
     width: 100%;
     height: 100vh;
     overflow-y: hidden;
     scroll-snap-type: y mandatory;
-
 }
 .slides{
     width: 100%;

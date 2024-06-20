@@ -12,10 +12,10 @@
             font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #BFACE2;
+            background-color: #eceaff;
         }
         .header {
-            background-color: #BFACE2;
+            background-color: #eceaff;
             padding: 20px;
             text-align: center;
             font-size: 24px;
@@ -103,6 +103,77 @@
             color: #1daf;
             font-size: 18px;
         }
+        .admin-pic{
+            width: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            margin-left: 50px;
+        }
+        .sub-menu-wrap{
+            position: absolute;
+            top: 100%;
+            right: 10%;
+            width:320px;
+        }
+        .sub-menu{
+            background: #fff;
+            padding: 20px;
+            margin: 10px;
+        }
+        .user-info{
+            display: flex;
+            align-items: center;
+        }
+        .user-info h3{
+            font-weight: 500;
+        }
+        .user-info img{
+            width: 60px;
+            border-radius: 15px;
+            margin-right: 15px;
+            top: 100%;
+        }
+        //for dropdown profile
+        .dropdown {
+            position: relative;
+            display: inline-block;
+            margin-left: -40%;
+        }
+
+        .dropdown img {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            cursor: pointer;
+            margin-left: -40%;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #f9f9f9;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+            
+        }
+
+        .dropdown-content a {
+            color: black;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            
+        }
+
+        .dropdown-content a:hover {
+            background-color: #f1f1f1;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+            margin-left: -7%;
+        }
 
     </style>
 </head>
@@ -125,10 +196,15 @@
             <li><a href="#">
             <button type="button">VIEWING</button></a></li>
 
-            <a href="../../pages/admin/adminpage.php" class="role">
-                <img class="image" src="../pictures/home.png" alt="Home">
-            </a>
         </ul>
+        
+        <div class="dropdown">
+            <img src="../../pictures/default-avatar.png" alt="Avatar" class="admin-pic">
+            <div class="dropdown-content">
+                <a href="../../pages/admin/adminupdate.php">Edit Profile</a>
+                <a href="../../pages/other/logout.php">Logout</a>
+            </div>
+        </div>
     </div>
 
     <div class="content">
