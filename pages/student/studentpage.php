@@ -1,5 +1,13 @@
 <?php
     include ('../../config/config.php');
+
+    if ($_SERVER['REQUEST_METHOD'] == "POST") {
+        // Retrieve the logged-in studUsername from the session
+        if (!isset($_SESSION['studUsername'])) {
+            echo "<script type='text/javascript'>alert('Student Username is not set in the session');</script>";
+            exit();
+        }
+    }
 ?>
 
 <!DOCTYPE html>
@@ -100,7 +108,7 @@
             <li><a href="../../pages/student/studentinsert.php"><button type="button">INSERT</button></a></li>
             <li><a href="../../pages/student/studentupdate.php"><button type="button">UPDATE</button></a></li>
             <li><button type="button">REMOVE</button></li>
-            <li><button type="button">SEARCH</button></li>
+            <li><a href="../../pages/student/viewPay.php"><button type="button">PAY</button></a></li>
             <li><button type="button">VIEWING</button></li>
         </ul>
         <img class="image" src="../../pictures/home.png" alt="Home">

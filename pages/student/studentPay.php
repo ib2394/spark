@@ -10,9 +10,15 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
     }
     $studUsername = $_SESSION['studUsername'];
 
-    $trackingNumber = $_POST['trackingNumber'];
-    $courname = $_POST['courier_name'];
+    $trackingNumber = $_SESSION['trackingNumber'];
+    $courname = $_SESSION['courname'];
+    $paymethod = $_POST['paymethod'];
 
+    // Handle file upload for payment proof
+    $proof = null;
+    if (isset($_FILES['proof']['tmp_name']) && !empty($_FILES['proof']['tmp_name'])) {
+        $proof = file_get_contents($_FILES['proof']['tmp_name']);
+    }
 
     // Check if the studUsername exists in the student table
     $stmt_check_student = $con->prepare("SELECT studUsername FROM student WHERE studUsername =?");
@@ -26,18 +32,50 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
     }
     $stmt_check_student->close();
 
+     // Check if the TRACKING NUMBER exists in the student table
+     $stmt_check_parcel = $con->prepare("SELECT trackingNumber FROM parcel WHERE trackingNumber =?");
+     $stmt_check_parcel->bind_param("s", $trackingNumber);
+     $stmt_check_parcel->execute();
+     $result_parcel = $stmt_check_parcel->get_result();
+ 
+     if ($result_parcel->num_rows == 0) {
+         echo "<script type='text/javascript'>alert('tracking number does not exist');</script>";
+         exit();
+     }
+     $stmt_check_parcel->close();
+ 
+     
+    // Calculate price based on parcel size
+    $size = $_POST['size']; 
+        $price = 'RM 1';
+    } elseif ($size == 'Medium') {
+        $price = 'RM 2';
+    } elseif ($size == 'Large') {
+        $price = 'RM 3';
+    } else {
+        echo "<script type='text/javascript'>alert('Invalid size');</script>";
+        exit();
+    }
+
+    // Insert the payment information
+    $stmt_insert_payment = $con->prepare("INSERT INTO payment (paymethod, price) VALUES (?,?)");
+    $stmt_insert_payment->bind_param("ss", $paymethod, $price);
+    $stmt_insert_payment->execute();
+    $payid = $stmt_insert_payment->insert_id;
+    $stmt_insert_payment->close();
+
     // Get current date and time
     $currentDate = date('Y-m-d');
-    $currentTime = date('H:i:s'); 
+    $currentTime = date('H:i:s');
 
-     // Insert the data into the parcel table with the associated studid
-     $stmt_insert_parcel = $con->prepare("INSERT INTO parcel (trackingNumber, courname, payid, studid, date, time) VALUES (?,?,?,?,?,?)");
-     $stmt_insert_parcel->bind_param("ssssss", $trackingNumber, $courname, $payid, $studid, $currentDate, $currentTime);
-     $stmt_insert_parcel->execute();
-     $stmt_insert_parcel->close();
+    // Insert the parcel information
+    $stmt_insert_parcel = $con->prepare("INSERT INTO parcel (trackingNumber, courname, payid, studid, date, time) VALUES (?,?,?,?,?,?)");
+    $stmt_insert_parcel->bind_param("ssssss", $trackingNumber, $courname, $payid, $studUsername, $currentDate, $currentTime);
+    $stmt_insert_parcel->execute();
+    $stmt_insert_parcel->close();
 
     echo "<script type='text/javascript'>alert('Successfully inserted');</script>";
-} else {
+ else {
     echo "<script type='text/javascript'>alert('Please enter some valid information');</script>";
 }
 ?>
@@ -227,24 +265,25 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
         </div>
     </div>
     <div class="form-container">
-        <form action="studentinsert.php" method="post" class="form-grid">
+        <form action="studentPay.php" method="post" class="form-grid">
             <div class="input-group">
                 <input type="text" name="trackingNumber" required>
                 <label for="trackingNumber">Tracking Number :</label>
             </div>
             <div class="input-group">
-                <select name="courier_name" required>
-                    <option value="" disabled selected>Select Courier Name</option>
-                    <option value="JNT">JNT</option>
-                    <option value="DHL">DHL</option>
-                    <option value="NINJAVAN">NINJAVAN</option>
-                    <option value="POSLAJU">POSLAJU</option>
-                    <option value="SHOPEEEXPRESS">SHOPEEEXPRESS</option>
+                <select name="paymethod" required>
+                    <option value="" disabled selected>Select Payment Method</option>
+                    <option value="CASH">CASH</option>
+                    <option value="QR">QR</option>
                 </select>
-                <label for="courier_name">Courier Name :</label>
+                <label for="paymethod">Payment Method :</label>
+            </div>
+            <div class="input-group">
+                <input type="file" name="proof" required>
+                <label for="proof">Payment Proof :</label>
             </div>
             <div class="submit-btn">
-                <button type="submit">ADD</button>
+                <button type="submit">SUBMIT</button>
             </div>
         </form>
     </div>
