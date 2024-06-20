@@ -12,6 +12,8 @@ if(isset($_POST['submit'])){
     $email = $_POST['email'];
     $studphone = $_POST['studphone'];
 
+    //Insert profile picture
+
     /* execute SQL SELECT command */
     $sql = "SELECT studUsername FROM student WHERE studUsername = '$studUsername'";
     echo $sql;

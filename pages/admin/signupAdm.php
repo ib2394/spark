@@ -131,10 +131,28 @@ function createUserDetailsId(){
                     <input type="text" name="admphone" autocomplete="off" required>
                 </div>
 
-                <!-- <div class="field input">
-                    <label for="admPic">Profile Picture</label>
-                    <input type="file" name="admPic" id="admPic" accept="image/*">
-                </div> -->
+                <div class="card">
+                    <img src="../../pictures/default-avatar.png" id="profile-pic">
+                    <label for="input-file">Profile Picture</label>
+                    <input type="file" accept="image/jpeg, image/png, image/jpg" id="imput-file">
+                </div>
+
+                <script>
+                    let profilePic = document.getElementById("profile-pic");
+                    let inputfile = document.getElementById("input-file");
+
+                    inputFile.onchange = function(){
+                        profilePic.src = URLcreateObjectURL(inputFile.files[0]);
+                    }
+                </script>
+
+                <!--<div class="stud-img">
+                    <img src="../../pictures/default-avatar.png" id="photo">
+                    <input type="file" accept="image/jpeg, image/png, image/jpg" id="file">
+                    <label for="file" id="uploadbtn"><i class="fas fa-camera"></i></label>
+                    
+                </div>
+                <script src="index.js"></script> -->
 
                 <div class="field">
                     <input type="submit" class="btn" name="submit" value="Sign Up" required>
