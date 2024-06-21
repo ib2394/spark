@@ -13,6 +13,22 @@ if (isset($_SESSION['empUsername'])) {
         $status = $_POST['status'] ?? null;
         $payStatus = $_POST['payStatus'] ?? null;
 
+        // Calculate price based on size
+        switch ($size) {
+            case 'small':
+                $price = 1;
+                break;
+            case 'medium':
+                $price = 2;
+                break;
+            case 'large':
+                $price = 3;
+                break;
+            default:
+                $price = 0; // Default or error handling if necessary
+                break;
+        }
+
         // Check if the tracking number exists in the parcel table
         $stmt_check_parcel = $con->prepare("SELECT trackingNumber FROM parcel WHERE trackingNumber = ?");
         $stmt_check_parcel->bind_param("s", $trackingNumber);
@@ -21,15 +37,14 @@ if (isset($_SESSION['empUsername'])) {
 
         if ($result->num_rows > 0) {
             // Update the parcel table
-            $stmt_parcel = $con->prepare("UPDATE parcel SET size = ?, status = ?, payStatus = ?, empid = ? WHERE trackingNumber = ?");
-            $stmt_parcel->bind_param("sssss", $size, $status, $payStatus, $empid, $trackingNumber);
+            $stmt_parcel = $con->prepare("UPDATE parcel SET size = ?, status = ?, payStatus = ?, empid = ?, price = ? WHERE trackingNumber = ?");
+            $stmt_parcel->bind_param("ssssss", $size, $status, $payStatus, $empid, $price, $trackingNumber);
             $exec_parcel = $stmt_parcel->execute();
             $stmt_parcel->close();
 
             if ($exec_parcel === false) {
                 die('Execute failed for parcel update: ' . htmlspecialchars($con->error));
             }
-            
 
             echo "<script type='text/javascript'>alert('Successfully updated');</script>";
         } else {
@@ -45,12 +60,12 @@ if (isset($_SESSION['empUsername'])) {
 
 
 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="../../css/style2.css">
     <title>Employee Update</title>
     <style>
         /* Basic reset */
@@ -58,33 +73,27 @@ if (isset($_SESSION['empUsername'])) {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'poppins', sans-serif;
         }
 
         body {
-            font-family: 'poppins', sans-serif;
+            font-family: 'Poppins', sans-serif;
             background-color: #BFACE2;
             color: #333;
+            line-height: 1.6;
         }
 
         /* Banner styling */
         .banner {
-            background: #BFACE2;
-            color: black;
+            background: #645CBB;
+            color: white;
             padding: 1rem 2rem;
             text-align: center;
+            margin-bottom: 1rem;
         }
 
         .banner h1 {
             margin-bottom: 0.5rem;
-        }
-
-        .image {
-            width: 30px;
-            display: flex;
-            align-items: center;
-            cursor: pointer;
-            margin: 20px 10px;
+            font-size: 2rem;
         }
 
         .navbar {
@@ -103,25 +112,22 @@ if (isset($_SESSION['empUsername'])) {
         .navbar ul {
             list-style: none;
             display: flex;
-            gap: 8rem;
+            gap: 1rem;
+            align-items: center;
         }
 
         .navbar ul button {
-            width: 200px;
             background: #645CBB;
-            color: black;
+            color: white;
             border: none;
-            text-align: center;
-            padding: 0.5rem 2rem;
-            margin: 20px 10px;
+            padding: 0.75rem 1.5rem;
             cursor: pointer;
             border-radius: 20px;
             font-size: 1rem;
-            position: relative;
         }
 
         .navbar ul button:hover {
-            background: #645CBB;
+            background: #524a99;
         }
 
         .navbar ul img.image {
@@ -131,87 +137,67 @@ if (isset($_SESSION['empUsername'])) {
 
         /* Form styling */
         .form-container {
-            display: flex;
-            justify-content: center;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             padding: 2rem;
-            background-color: #BFACE2;
+            margin: 0 auto;
+            max-width: 600px;
         }
 
         .form-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem 2rem;
-            align-items: center;
+            grid-template-columns: 1fr;
+            gap: 1rem;
         }
 
         .input-group {
             position: relative;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .input-group input[type="text"], .input-group select {
-            padding: 0.75rem;
-            border: 2px solid #333;
-            border-radius: 4px;
-            font-size: 1rem;
-            background-color: #e0d4f7;
-            width: 100%; /* Ensure it matches the width of the container */
-        }
-
-        /* Remove unnecessary padding and margin for select elements */
-        .input-group select {
-            padding: 0.75rem; /* Match the input padding */
-            margin: 0; /* Remove extra margin */
+            margin-bottom: 1rem;
         }
 
         .input-group label {
+            display: block;
             margin-bottom: 0.5rem;
             font-size: 1rem;
             color: #333;
         }
 
+        .input-group input[type="text"],
+        .input-group select {
+            width: 100%;
+            padding: 0.75rem;
+            font-size: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-group input[type="text"]:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: #645CBB;
+        }
+
         .submit-btn {
-            grid-column: span 2;
-            display: flex;
-            justify-content: center;
+            text-align: center;
             margin-top: 1rem;
         }
 
         .submit-btn button {
             background: #645CBB;
-            color: black;
+            color: white;
             border: none;
-            padding: 0.75rem 1.5rem;
+            padding: 0.75rem 2rem;
             cursor: pointer;
             border-radius: 20px;
             font-size: 1rem;
+            transition: background 0.3s ease;
         }
 
         .submit-btn button:hover {
-            background: #645CBB;
-        }
-
-        button {
-            width: 200px;
-            padding: 15px;
-            margin: 20px 5px;
-            text-align: center;
-            border-radius: 25px;
-            color: black;
-            border: 2px;
-            font-size: 20px;
-            cursor: pointer;
-            font-weight: 600;
-        }
-
-        button:hover {
-            background-color: #645CBB;
-            transition: 0.3s;
-        }
-
-        button:hover {
-            color: white;
+            background: #524a99;
         }
     </style>
 </head>
@@ -222,48 +208,48 @@ if (isset($_SESSION['empUsername'])) {
             <img class="logo" src="../../pictures/logoParcel.png" alt="Logo">
             <ul>
                 <li><a href="employeeupdate.php"><button type="button">UPDATE</button></a></li>
-                <button type="button">REMOVE</button>
-                <button type="button">VIEWING</button>
-                <img class="image" src="../../pictures/home.png" alt="Home">
+                <li><button type="button">REMOVE</button></li>
+                <li><button type="button">VIEWING</button></li>
+                <li><img class="image" src="../../pictures/home.png" alt="Home"></li>
             </ul>
         </div>
-        <div class="form-container">
-            <form action="../../pages/employee/employeeupdate.php" method="post" class="form-grid">
-                <div class="input-group">
-                    <input type="text" name="trackingNumber" required>
-                    <label for="trackingNumber">Tracking Number :</label>
-                </div>
-                <div class="input-group">
-                    <select name="size" required>
-                        <option value="" disabled selected>Select Parcel Size</option>
-                        <option value="large">Large</option>
-                        <option value="medium">Medium</option>
-                        <option value="small">Small</option>
-                    </select>
-                    <label for="size">Parcel Size :</label>
-                </div>
-                <div class="input-group">
-                    <select name="status" required>
-                        <option value="" disabled selected>Select Parcel Status</option>
-                        <option value="waiting">Waiting</option>
-                        <option value="pickup">Pickup</option>
-                        <option value="delivered">Delivered</option>
-                    </select>
-                    <label for="status">Parcel Status :</label>
-                </div>
-                <div class="input-group">
-                    <select name="payStatus" required>
-                        <option value="" disabled selected>Select Payment Status</option>
-                        <option value="paid">PAID</option>
-                        <option value="unpaid">UNPAID</option>
-                    </select>
-                    <label for="payStatus">Payment Status :</label>
-                </div>
-                <div class="submit-btn">
-                    <button type="submit">UPDATE</button>
-                </div>
-            </form>
-        </div>
+    </div>
+    <div class="form-container">
+        <form action="../../pages/employee/employeeupdate.php" method="post" class="form-grid">
+            <div class="input-group">
+                <label for="trackingNumber">Tracking Number :</label>
+                <input type="text" id="trackingNumber" name="trackingNumber" required>
+            </div>
+            <div class="input-group">
+                <label for="size">Parcel Size :</label>
+                <select id="size" name="size" required>
+                    <option value="" disabled selected>Select Parcel Size</option>
+                    <option value="large">Large</option>
+                    <option value="medium">Medium</option>
+                    <option value="small">Small</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label for="status">Parcel Status :</label>
+                <select id="status" name="status" required>
+                    <option value="" disabled selected>Select Parcel Status</option>
+                    <option value="waiting">Waiting</option>
+                    <option value="pickup">Pickup</option>
+                    <option value="delivered">Delivered</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label for="payStatus">Payment Status :</label>
+                <select id="payStatus" name="payStatus" required>
+                    <option value="" disabled selected>Select Payment Status</option>
+                    <option value="paid">PAID</option>
+                    <option value="unpaid">UNPAID</option>
+                </select>
+            </div>
+            <div class="submit-btn">
+                <button type="submit">UPDATE</button>
+            </div>
+        </form>
     </div>
 </body>
 </html>

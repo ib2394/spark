@@ -3,7 +3,7 @@
 
     if ($_SERVER['REQUEST_METHOD'] == "POST") {
         // Retrieve the logged-in studUsername from the session
-        if (!isset($_SESSION['studUsername'])) {
+        if (!isset($_SESSION['studid'])) {
             echo "<script type='text/javascript'>alert('Student Username is not set in the session');</script>";
             exit();
         }

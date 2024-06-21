@@ -1,82 +1,72 @@
 <?php
 session_start();
-include '../../config/config.php';
+include('../../config/config.php');
 
-if ($_SERVER['REQUEST_METHOD'] == "POST") {
-    // Retrieve the logged-in studid from the session
-    if (!isset($_SESSION['studUsername'])) {
-        echo "<script type='text/javascript'>alert('Student Username is not set in the session');</script>";
-        exit();
-    }
-    $studUsername = $_SESSION['studUsername'];
+// Check if the user is logged in
+if (!isset($_SESSION['studid'])) {
+    echo "<script type='text/javascript'>alert('Student Username is not set in the session');</script>";
+    exit();
+}
 
-    $trackingNumber = $_SESSION['trackingNumber'];
-    $courname = $_SESSION['courname'];
-    $paymethod = $_POST['paymethod'];
+// Get the student username from session
+$studid = $_SESSION['studid'];
 
+// Check if the form is submitted
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Handle file upload for payment proof
-    $proof = null;
-    if (isset($_FILES['proof']['tmp_name']) && !empty($_FILES['proof']['tmp_name'])) {
-        $proof = file_get_contents($_FILES['proof']['tmp_name']);
-    }
+    $proofFile = $_FILES['proofFile'];
+    $proofFileName = $_FILES['proofFile']['name'];
+    $proofFileTmpName = $_FILES['proofFile']['tmp_name'];
+    $proofFileSize = $_FILES['proofFile']['size'];
+    $proofFileError = $_FILES['proofFile']['error'];
+    $proofFileType = $_FILES['proofFile']['type'];
 
-    // Check if the studUsername exists in the student table
-    $stmt_check_student = $con->prepare("SELECT studUsername FROM student WHERE studUsername =?");
-    $stmt_check_student->bind_param("s", $studUsername);
-    $stmt_check_student->execute();
-    $result_student = $stmt_check_student->get_result();
+    // File extension
+    $fileExt = explode('.', $proofFileName);
+    $fileActualExt = strtolower(end($fileExt));
 
-    if ($result_student->num_rows == 0) {
-        echo "<script type='text/javascript'>alert('Student Username does not exist');</script>";
-        exit();
-    }
-    $stmt_check_student->close();
+    // Allowed file types
+    $allowed = array('jpg', 'jpeg', 'png', 'pdf');
 
-     // Check if the TRACKING NUMBER exists in the student table
-     $stmt_check_parcel = $con->prepare("SELECT trackingNumber FROM parcel WHERE trackingNumber =?");
-     $stmt_check_parcel->bind_param("s", $trackingNumber);
-     $stmt_check_parcel->execute();
-     $result_parcel = $stmt_check_parcel->get_result();
- 
-     if ($result_parcel->num_rows == 0) {
-         echo "<script type='text/javascript'>alert('tracking number does not exist');</script>";
-         exit();
-     }
-     $stmt_check_parcel->close();
- 
-     
-    // Calculate price based on parcel size
-    $size = $_POST['size']; 
-        $price = 'RM 1';
-    } elseif ($size == 'Medium') {
-        $price = 'RM 2';
-    } elseif ($size == 'Large') {
-        $price = 'RM 3';
+    // Check if file type is allowed
+    if (in_array($fileActualExt, $allowed)) {
+        if ($proofFileError === 0) {
+            if ($proofFileSize < 1000000) { // 1MB limit
+                $fileNameNew = uniqid('', true) . "." . $fileActualExt;
+                $fileDestination = '../../uploads/' . $fileNameNew;
+                move_uploaded_file($proofFileTmpName, $fileDestination);
+
+                // Insert payment method into 'payments' table
+                $payMethod = mysqli_real_escape_string($con, $_POST['payMethod']);
+                $selectedParcels = isset($_POST['parcels']) ? explode(',', $_POST['parcels']) : [];
+                foreach ($selectedParcels as $trackingNumber) {
+                    $insertPaymentQuery = "INSERT INTO payments (trackingNumber, studUsername, payMethod) VALUES ('$trackingNumber', '$studUsername', '$payMethod')";
+                    if (mysqli_query($con, $insertPaymentQuery)) {
+                        echo "<script type='text/javascript'>alert('Payment method saved successfully');</script>";
+                    } else {
+                        echo "<script type='text/javascript'>alert('Error: Could not execute $insertPaymentQuery.');</script>";
+                    }
+                }
+
+                // Update proof of payment location in 'parcel' table
+                $updateParcelQuery = "UPDATE parcel SET proofFile = '$fileDestination' WHERE trackingNumber IN ('" . implode("','", $selectedParcels) . "') AND studUsername = '$studUsername'";
+                if (mysqli_query($con, $updateParcelQuery)) {
+                    echo "<script type='text/javascript'>alert('Proof of payment saved successfully');</script>";
+                } else {
+                    echo "<script type='text/javascript'>alert('Error: Could not update proof of payment location.');</script>";
+                }
+
+                // Optionally redirect after successful operations
+                // header('Location: success.php');
+            } else {
+                echo "<script type='text/javascript'>alert('Your file is too big!');</script>";
+            }
+        } else {
+            echo "<script type='text/javascript'>alert('There was an error uploading your file!');</script>";
+        }
     } else {
-        echo "<script type='text/javascript'>alert('Invalid size');</script>";
-        exit();
+        echo "<script type='text/javascript'>alert('You cannot upload files of this type!');</script>";
     }
-
-    // Insert the payment information
-    $stmt_insert_payment = $con->prepare("INSERT INTO payment (paymethod, price) VALUES (?,?)");
-    $stmt_insert_payment->bind_param("ss", $paymethod, $price);
-    $stmt_insert_payment->execute();
-    $payid = $stmt_insert_payment->insert_id;
-    $stmt_insert_payment->close();
-
-    // Get current date and time
-    $currentDate = date('Y-m-d');
-    $currentTime = date('H:i:s');
-
-    // Insert the parcel information
-    $stmt_insert_parcel = $con->prepare("INSERT INTO parcel (trackingNumber, courname, payid, studid, date, time) VALUES (?,?,?,?,?,?)");
-    $stmt_insert_parcel->bind_param("ssssss", $trackingNumber, $courname, $payid, $studUsername, $currentDate, $currentTime);
-    $stmt_insert_parcel->execute();
-    $stmt_insert_parcel->close();
-
-    echo "<script type='text/javascript'>alert('Successfully inserted');</script>";
- else {
-    echo "<script type='text/javascript'>alert('Please enter some valid information');</script>";
 }
 ?>
 
@@ -85,207 +75,105 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Insert</title>
+    <title>Payment Interface</title>
     <style>
-        /* Basic reset */
-        * {
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f0f4f8;
+            color: #333;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
-            font-family: 'poppins', sans-serif;
         }
-
-        body {
-            font-family: 'poppins', sans-serif;
-            background-color: #BFACE2;
-            color: #333;
-        }
-
-        /* Banner styling */
-        .banner {
-            background: #BFACE2;
-            color: black;
-            padding: 1rem 2rem;
-            text-align: center;
-        }
-
-        .banner h1 {
-            margin-bottom: 0.5rem;
-        }
-
-        .image {
-            width: 30px;
-            display: flex;
-            align-items: center;
-            cursor: pointer;
-            margin: 20px 10px;
-        }
-
-        .navbar {
+        .container {
+            width: 80%;
+            margin: 2rem auto;
+            background-color: #fff;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            padding: 1rem 2rem;
-            background: #BFACE2;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            gap: 2rem;
         }
-
-        .navbar img.logo {
-            width: 120px;
-            cursor: pointer;
-        }
-
-        .navbar ul {
-            list-style: none;
-            display: flex;
-            gap: 3rem;
-        }
-
-        .navbar ul button {
-            width: 200px;
-            background: #645CBB;
-            color: black;
-            border: none;
+        .qr-code {
+            flex: 0 0 30%;
+            max-width: 30%;
             text-align: center;
-            padding: 0.5rem 2rem;
-            margin: 20px 10px;
-            cursor: pointer;
-            border-radius: 20px;
-            font-size: 1rem;
-            position: relative;
         }
-
-        .navbar ul button:hover {
-            background: #645CBB;
+        .payment-form {
+            flex: 1;
+            max-width: 60%;
         }
-
-        .navbar ul img.image {
-            height: 30px;
-            cursor: pointer;
+        h2 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #4a4a4a;
         }
-
-        /* Form styling */
-        .form-container {
-            display: flex;
-            justify-content: center;
-            padding: 2rem;
-            background-color: #BFACE2;
+        .form-group {
+            margin-bottom: 1.5rem;
         }
-
-        .form-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem 2rem;
-            align-items: center;
-        }
-
-        .input-group {
-            position: relative;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .input-group input[type="text"], .input-group select, .input-group input[type="file"] {
-            padding: 0.75rem;
-            border: 2px solid #333;
-            border-radius: 4px;
-            font-size: 1rem;
-            background-color: #e0d4f7;
-            width: 100%; /* Ensure it matches the width of the container */
-        }
-
-        /* Remove unnecessary padding and margin for select elements */
-        .input-group select {
-            padding: 0.75rem; /* Match the input padding */
-            margin: 0; /* Remove extra margin */
-        }
-
-        .input-group label {
+        label {
+            display: block;
+            font-weight: bold;
             margin-bottom: 0.5rem;
+            color: #555;
+        }
+        select, input[type="file"] {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ccc;
+            border-radius: 5px;
             font-size: 1rem;
-            color: #333;
+            box-sizing: border-box;
+            transition: border-color 0.3s ease;
         }
-
-        .submit-btn {
-            grid-column: span 2;
-            display: flex;
-            justify-content: center;
-            margin-top: 1rem;
+        select:focus, input[type="file"]:focus {
+            border-color: #921BA3;
         }
-
-        .submit-btn button {
-            background: #645CBB;
-            color: black;
+        button[type="submit"] {
+            background-color: #921BA3;
+            color: white;
             border: none;
             padding: 0.75rem 1.5rem;
             cursor: pointer;
             border-radius: 20px;
             font-size: 1rem;
+            transition: background 0.3s ease;
         }
-
-        .submit-btn button:hover {
-            background: #645CBB;
-        }
-
-        button {
-            width: 200px;
-            padding: 15px;
-            margin: 20px 5px;
-            text-align: center;
-            border-radius: 25px;
-            color: black;
-            border: 2px;
-            font-size: 20px;
-            cursor: pointer;
-            font-weight: 600;
-        }
-
-        button:hover {
-            background-color: #645CBB;
-            transition: 0.3s;
-        }
-
-        button:hover {
-            color: white;
+        button[type="submit"]:hover {
+            background-color: #357abd;
         }
     </style>
 </head>
 <body>
-    <div class="banner">
-        <h1>STUDENT</h1>
-        <div class="navbar">
-            <img class="logo" src="../../pictures/logoParcel.png" alt="Logo">
-            <ul>
-                <li><a href="studentinsert.php"><button type="button">ADD PARCEL</button></a></li>
-                <li><a href="studentupdate.php"><button type="button">EDIT PARCEL</button></a></li>
-                <button type="button">REMOVE</button>
-                <button type="button">SEARCH</button>
-                <button type="button">VIEWING</button>
-                <img class="image" src="../../pictures/home.png" alt="Home">
-            </ul>
+    <div class="container">
+        <div class="qr-code">
+            <h3>Scan QR Code for Payment</h3>
+            <img src="../../pictures/qrPay.jpg" alt="QR Code for Payment" style="max-width: 100%;">
         </div>
-    </div>
-    <div class="form-container">
-        <form action="studentPay.php" method="post" class="form-grid">
-            <div class="input-group">
-                <input type="text" name="trackingNumber" required>
-                <label for="trackingNumber">Tracking Number :</label>
-            </div>
-            <div class="input-group">
-                <select name="paymethod" required>
-                    <option value="" disabled selected>Select Payment Method</option>
-                    <option value="CASH">CASH</option>
-                    <option value="QR">QR</option>
-                </select>
-                <label for="paymethod">Payment Method :</label>
-            </div>
-            <div class="input-group">
-                <input type="file" name="proof" required>
-                <label for="proof">Payment Proof :</label>
-            </div>
-            <div class="submit-btn">
-                <button type="submit">SUBMIT</button>
-            </div>
-        </form>
+        <div class="payment-form">
+            <h2>Pay Selected Parcels</h2>
+            <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="payMethod">Payment Method:</label>
+                    <select name="payMethod" id="payMethod" required>
+                        <option value="CASH">CASH</option>
+                        <option value="QR">QR</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="proofFile">Proof of Payment:</label>
+                    <input type="file" name="proofFile" id="proofFile" required>
+                </div>
+                <input type="hidden" name="parcels" value="<?php echo isset($_POST['parcels']) ? htmlspecialchars($_POST['parcels']) : ''; ?>">
+                <button type="submit">Submit Payment</button>
+            </form>
+        </div>
     </div>
 </body>
 </html>
+
+
+

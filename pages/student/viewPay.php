@@ -12,8 +12,8 @@ $start_from = ($page - 1) * $results_per_page;
 // Determine if there is a search query
 $search_query = isset($_GET['search']) ? $_GET['search'] : '';
 
-if (isset($_SESSION['studUsername'])) {
-    $studUsername = $_SESSION['studUsername'];
+if (isset($_SESSION['studid'])) {
+    $studid = $_SESSION['studid'];
 
     // Fetch the number of total rows based on the search query
     if (!empty($search_query)) {
@@ -131,20 +131,22 @@ if (isset($_SESSION['studUsername'])) {
             background-color: #5145a3;
         }
         .pay-button {
-            padding: 0.5rem 1rem;
-            background-color: #28a745;
-            color: #fff;
-            border: none;
-            cursor: pointer;
-            font-size: 1rem;
-            margin-top: 1rem;
-            display: block;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        .pay-button:hover {
-            background-color: #218838;
-        }
+    background-color: #645CBB;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    cursor: pointer;
+    border-radius: 20px;
+    font-size: 1rem;
+    text-decoration: none; /* Ensure button inside <a> tag doesn't get underlined */
+    display: inline-block; /* Make sure button behaves correctly inside the anchor tag */
+    transition: background 0.3s ease;
+}
+
+.pay-button:hover {
+    background-color: #524a99;
+}
+
         .chip {
             display: inline-block;
             padding: 0.5rem 1rem;
@@ -207,7 +209,9 @@ if (isset($_SESSION['studUsername'])) {
                         <?php endforeach; ?>
                     </tbody>
                 </table>
-                <button type="submit" class="pay-button">Pay Selected Parcels</button>
+                <a href="../../pages/student/studentPay.php" class="pay-button">
+                    <button type="button" class="pay-button">Pay Selected Parcels</button>
+                </a>
                 <ul class="pagination">
                     <?php for ($i = 1; $i <= $total_pages; $i++) : ?>
                         <li>

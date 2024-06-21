@@ -16,7 +16,7 @@
                     $user_data=mysqli_fetch_assoc($result);
 
                     if ($user_data['studpass'] == $studpass) {
-                        $_SESSION['studUsername'] = $user_data['studUsername'];  // Store studid in session
+                        $_SESSION['studid'] = $user_data['studid'];  // Store studid in session
                         header("location: studentpage.php");  // Redirect to student page
                         die;
                     }
@@ -28,6 +28,7 @@
             echo "<script>alert('Oops! Wrong ID or Password')</script>";
         }
     }
+
 
 ?>
 

@@ -4,19 +4,20 @@ include '../../config/config.php';
 
 if ($_SERVER['REQUEST_METHOD'] == "POST") {
     // Retrieve the logged-in studid from the session
-    if (!isset($_SESSION['studUsername'])) {
+    if (!isset($_SESSION['studid'])) {
+        echo $_SESSION['studid'];
         echo "<script type='text/javascript'>alert('Student Username is not set in the session');</script>";
         exit();
     }
-    $studUsername = $_SESSION['studUsername'];
+    $studid = $_SESSION['studid'];
 
     $trackingNumber = $_POST['trackingNumber'];
     $courname = $_POST['courier_name'];
 
 
-    // Check if the studUsername exists in the student table
-    $stmt_check_student = $con->prepare("SELECT studUsername FROM student WHERE studUsername =?");
-    $stmt_check_student->bind_param("s", $studUsername);
+    // Check if the studid exists in the student table
+    $stmt_check_student = $con->prepare("SELECT studid FROM student WHERE studid =?");
+    $stmt_check_student->bind_param("s", $studid);
     $stmt_check_student->execute();
     $result_student = $stmt_check_student->get_result();
 
@@ -47,40 +48,34 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Insert</title>
+    <title>Student Add Parcel</title>
     <style>
         /* Basic reset */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'poppins', sans-serif;
         }
 
         body {
-            font-family: 'poppins', sans-serif;
+            font-family: 'Poppins', sans-serif;
             background-color: #BFACE2;
             color: #333;
+            line-height: 1.6;
         }
 
         /* Banner styling */
         .banner {
-            background: #BFACE2;
-            color: black;
+            background: #645CBB;
+            color: white;
             padding: 1rem 2rem;
             text-align: center;
+            margin-bottom: 1rem;
         }
 
         .banner h1 {
             margin-bottom: 0.5rem;
-        }
-
-        .image {
-            width: 30px;
-            display: flex;
-            align-items: center;
-            cursor: pointer;
-            margin: 20px 10px;
+            font-size: 2rem;
         }
 
         .navbar {
@@ -99,25 +94,22 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
         .navbar ul {
             list-style: none;
             display: flex;
-            gap: 3rem;
+            gap: 1rem;
+            align-items: center;
         }
 
         .navbar ul button {
-            width: 200px;
             background: #645CBB;
-            color: black;
+            color: white;
             border: none;
-            text-align: center;
-            padding: 0.5rem 2rem;
-            margin: 20px 10px;
+            padding: 0.75rem 1.5rem;
             cursor: pointer;
             border-radius: 20px;
             font-size: 1rem;
-            position: relative;
         }
 
         .navbar ul button:hover {
-            background: #645CBB;
+            background: #524a99;
         }
 
         .navbar ul img.image {
@@ -127,87 +119,67 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
 
         /* Form styling */
         .form-container {
-            display: flex;
-            justify-content: center;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             padding: 2rem;
-            background-color: #BFACE2;
+            margin: 0 auto;
+            max-width: 600px;
         }
 
         .form-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem 2rem;
-            align-items: center;
+            grid-template-columns: 1fr;
+            gap: 1rem;
         }
 
         .input-group {
             position: relative;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .input-group input[type="text"], .input-group select, .input-group input[type="file"] {
-            padding: 0.75rem;
-            border: 2px solid #333;
-            border-radius: 4px;
-            font-size: 1rem;
-            background-color: #e0d4f7;
-            width: 100%; /* Ensure it matches the width of the container */
-        }
-
-        /* Remove unnecessary padding and margin for select elements */
-        .input-group select {
-            padding: 0.75rem; /* Match the input padding */
-            margin: 0; /* Remove extra margin */
+            margin-bottom: 1rem;
         }
 
         .input-group label {
+            display: block;
             margin-bottom: 0.5rem;
             font-size: 1rem;
             color: #333;
         }
 
+        .input-group input[type="text"],
+        .input-group select {
+            width: 100%;
+            padding: 0.75rem;
+            font-size: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-group input[type="text"]:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: #645CBB;
+        }
+
         .submit-btn {
-            grid-column: span 2;
-            display: flex;
-            justify-content: center;
+            text-align: center;
             margin-top: 1rem;
         }
 
         .submit-btn button {
             background: #645CBB;
-            color: black;
+            color: white;
             border: none;
-            padding: 0.75rem 1.5rem;
+            padding: 0.75rem 2rem;
             cursor: pointer;
             border-radius: 20px;
             font-size: 1rem;
+            transition: background 0.3s ease;
         }
 
         .submit-btn button:hover {
-            background: #645CBB;
-        }
-
-        button {
-            width: 200px;
-            padding: 15px;
-            margin: 20px 5px;
-            text-align: center;
-            border-radius: 25px;
-            color: black;
-            border: 2px;
-            font-size: 20px;
-            cursor: pointer;
-            font-weight: 600;
-        }
-
-        button:hover {
-            background-color: #645CBB;
-            transition: 0.3s;
-        }
-
-        button:hover {
-            color: white;
+            background: #524a99;
         }
     </style>
 </head>
@@ -219,21 +191,22 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
             <ul>
                 <li><a href="studentinsert.php"><button type="button">ADD PARCEL</button></a></li>
                 <li><a href="studentupdate.php"><button type="button">EDIT PARCEL</button></a></li>
-                <button type="button">REMOVE</button>
-                <button type="button">SEARCH</button>
-                <button type="button">VIEWING</button>
-                <img class="image" src="../../pictures/home.png" alt="Home">
+                <li><button type="button">REMOVE</button></li>
+                <li><button type="button">SEARCH</button></li>
+                <li><button type="button">VIEWING</button></li>
+                <li><img class="image" src="../../pictures/home.png" alt="Home"></li>
             </ul>
         </div>
     </div>
     <div class="form-container">
         <form action="studentinsert.php" method="post" class="form-grid">
             <div class="input-group">
-                <input type="text" name="trackingNumber" required>
                 <label for="trackingNumber">Tracking Number :</label>
+                <input type="text" id="trackingNumber" name="trackingNumber" required>
             </div>
             <div class="input-group">
-                <select name="courier_name" required>
+                <label for="courier_name">Courier Name :</label>
+                <select id="courier_name" name="courier_name" required>
                     <option value="" disabled selected>Select Courier Name</option>
                     <option value="JNT">JNT</option>
                     <option value="DHL">DHL</option>
@@ -241,7 +214,6 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
                     <option value="POSLAJU">POSLAJU</option>
                     <option value="SHOPEEEXPRESS">SHOPEEEXPRESS</option>
                 </select>
-                <label for="courier_name">Courier Name :</label>
             </div>
             <div class="submit-btn">
                 <button type="submit">ADD</button>
