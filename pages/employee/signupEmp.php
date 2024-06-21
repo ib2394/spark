@@ -13,7 +13,7 @@ if(isset($_POST['submit'])){
 
     /* execute SQL SELECT command */
     $sql = "SELECT empUsername FROM employee WHERE empUsername = '$empUsername'";
-    echo $sql;
+    
     $query = mysqli_query($con, $sql);
 
     if (!$query) {
@@ -29,18 +29,58 @@ if(isset($_POST['submit'])){
             exit();
     }
     else{
-        /* execute SQL INSERT commands */
-        $sql2 = "INSERT INTO employee (empUsername, emppass, empname, empphone, jobtitle) VALUES ('$empUsername','$emppass', '$empname', '$empphone', '$jobtitle')";
+    // Image upload handling
+    if(isset($_FILES['image']) && $_FILES['image']['error'] == 0){
+        $file = $_FILES['image'];
 
-        if (mysqli_query($con, $sql2)) {
-            echo "<script>alert('Succesfully registered!'); 
-                window.location.href = 'loginEmp.php';
-                </script>";
-            exit();
+        $fileName = $_FILES['image']['name'];
+        $fileTmpName = $_FILES['image']['tmp_name'];
+        $fileSize = $_FILES['image']['size'];
+        $fileError = $_FILES['image']['error'];
+        $fileType = $_FILES['image']['type'];
+
+        $fileExt = explode('.', $fileName);
+        $fileActualExt = strtolower(end($fileExt));
+
+        $allowed = array('jpg','jpeg','png');
+
+        if(in_array($fileActualExt, $allowed)) {
+            if($fileError === 0) {
+                //file size must be < 10MB
+                if($fileSize < 10485760) {
+                    $fileNameNew = $empUsername.".".$fileActualExt;
+                    $fileDestination = '../../ppUser/ppEmployee/'. $fileNameNew;
+
+                    move_uploaded_file($fileTmpName, $fileDestination); //to upload file to a specific folder
+
+                    /* execute SQL INSERT commands */
+                    $sql2 = "INSERT INTO employee (empUsername, emppass, empname, empphone, jobtitle, ppEmp) VALUES ('$empUsername','$emppass', '$empname', '$empphone', '$jobtitle', '$fileDestination')";
+
+                    if (mysqli_query($con, $sql2)) {
+                        echo "<script>alert('Succesfully registered!'); 
+                            window.location.href = 'loginEmp.php';
+                            </script>";
+                        exit();
+                    } else {
+                        echo "Error: " . mysqli_error($con);
+                    }
+                } else {
+                    echo "<script>
+                        alert('File is too big!');
+                    </script>";   
+                }
+            } else {
+                echo "<script>
+                    alert('There is an error in this file!');
+                </script>";  
+            }
         } else {
-            echo "Error: " . mysqli_error($con);
+            echo "<script>
+                alert('PNG, JPG, JPEG only!');
+            </script>";  
         }
     }
+}
 }
 
 /* close db connection */
@@ -111,7 +151,7 @@ function createUserDetailsId(){
         <div class="page">
             <div class="box form-box">
                 <header>Sign Up</header>
-                <form name="spark_system" method="post" action="../../pages/employee/signupEmp.php">
+                <form name="spark_system" method="post" action="#">
                     <div class="field input">
                         <label for="empUsername">Username </label>
                         <input type="text" name="empUsername" id="empUsername" autocomplete="off" required>
@@ -135,6 +175,12 @@ function createUserDetailsId(){
                     <div class="field input">
                         <label for="jobtitle">Job Title </label>
                         <input type="text" name="jobtitle" autocomplete="off" required>
+                    </div>
+
+                    <div class="card">
+                        <img src="../../pictures/default-avatar.png" id="profile-pic" style="margin-top: 10px; width: 20px; border-radius: 50%; object-fit: cover;">
+                        <label for="input-file">Profile Picture</label>
+                        <input type="file" name="image" accept="image/jpeg, image/png, image/jpg" id="input-file">
                     </div>
 
                     <div class="field">

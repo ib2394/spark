@@ -1,6 +1,15 @@
 <?php
+    session_start();
     include ('../../config/config.php');
+
+    $empid = $_SESSION['empid'];
+
+    $sql = "SELECT *
+	FROM employee WHERE empid = '$empid'";
+	$result = mysqli_query($con, $sql);
+	$row = mysqli_fetch_assoc($result);
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -94,6 +103,15 @@
             <img class="image" src="../../pictures/home.png" alt="Home">
         </ul>
     </div>
+
+    <div class="dropdown">
+        <img src="<?php echo $row['ppEmp']; ?>" alt="Avatar" class="admin-pic">
+        <div class="dropdown-content">
+            <a href="#">Edit Profile</a>
+            <a href="../../pages/other/logout.php">Logout</a>
+        </div>
+    </div>
+
     <div class="content">
         <h1>WELCOME TO EMPLOYEE PAGE</h1>
         <div class="icon">

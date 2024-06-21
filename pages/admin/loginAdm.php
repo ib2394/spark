@@ -21,7 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
                 // Verify the password
                 if ($user_data['admpass'] == $admpass) {
                     // Set session variable for adminid
-                    $_SESSION['admUsername'] = $user_data['admUsername'];
+                    $_SESSION['adminid'] = $user_data['adminid'];
 
                     // Redirect to admin page
                     header("Location: adminpage.php");

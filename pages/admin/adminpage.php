@@ -1,5 +1,13 @@
 <?php
+    session_start();
     include ('../../config/config.php');
+
+    $adminid = $_SESSION['adminid'];
+
+    $sql = "SELECT *
+	FROM admin WHERE adminid = '$adminid'";
+	$result = mysqli_query($con, $sql);
+	$row = mysqli_fetch_assoc($result);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -199,9 +207,9 @@
         </ul>
         
         <div class="dropdown">
-            <img src="../../pictures/default-avatar.png" alt="Avatar" class="admin-pic">
+            <img src="<?php echo $row['ppAdm']; ?>" alt="Avatar" class="admin-pic">
             <div class="dropdown-content">
-                <a href="../../pages/admin/adminupdate.php">Edit Profile</a>
+                <a href="#">Edit Profile</a>
                 <a href="../../pages/other/logout.php">Logout</a>
             </div>
         </div>
@@ -210,7 +218,7 @@
     <div class="content">
         <h1>WELCOME TO ADMIN PAGE</h1>
         <div class="icon">
-            <img src="../../pictures/admin icon.png" alt="Admin Icon">
+            <img src="../../pictures/admin.png" alt="Admin Icon">
         </div>
     </div>
 </div>

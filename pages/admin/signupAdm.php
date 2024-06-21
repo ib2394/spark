@@ -11,7 +11,7 @@ if(isset($_POST['submit'])){
 
     /* execute SQL SELECT command */
     $sql = "SELECT admUsername FROM admin WHERE admUsername = '$AdmUsername'";
-    echo $sql;
+    //echo $sql;
     $query = mysqli_query($con, $sql);
 
     if (!$query) {
@@ -27,16 +27,56 @@ if(isset($_POST['submit'])){
             exit();
     }
     else{
-        /* execute SQL INSERT commands */
-        $sql2 = "INSERT INTO admin (admUsername, admpass, admname, admphone) VALUES ('$AdmUsername','$Admpass', '$Admname', '$Admphone')";
+            // Image upload handling
+        if(isset($_FILES['image']) && $_FILES['image']['error'] == 0){
+            $file = $_FILES['image'];
 
-        if (mysqli_query($con, $sql2)) {
-            echo "<script>alert('Succesfully registered!'); 
-                window.location.href = 'loginAdm.php';
-                </script>";
-            exit();
-        } else {
-            echo "Error: " . mysqli_error($con);
+            $fileName = $_FILES['image']['name'];
+            $fileTmpName = $_FILES['image']['tmp_name'];
+            $fileSize = $_FILES['image']['size'];
+            $fileError = $_FILES['image']['error'];
+            $fileType = $_FILES['image']['type'];
+
+            $fileExt = explode('.', $fileName);
+            $fileActualExt = strtolower(end($fileExt));
+
+            $allowed = array('jpg','jpeg','png');
+
+            if(in_array($fileActualExt, $allowed)) {
+                if($fileError === 0) {
+                    //file size must be < 10MB
+                    if($fileSize < 10485760) {
+                        $fileNameNew = $AdmUsername.".".$fileActualExt;
+                        $fileDestination = '../../ppUser/ppAdmin/'. $fileNameNew;
+
+                        move_uploaded_file($fileTmpName, $fileDestination); //to upload file to a specific folder
+
+                        /* execute SQL INSERT commands */
+                        $sql2 = "INSERT INTO admin (admUsername, admpass, admname, admphone, ppAdm) VALUES ('$AdmUsername','$Admpass', '$Admname', '$Admphone', '$fileDestination')";
+
+                        if (mysqli_query($con, $sql2)) {
+                            echo "<script>alert('Succesfully registered!'); 
+                                window.location.href = 'loginAdm.php';
+                                </script>";
+                            exit();
+                        } else {
+                            echo "Error: " . mysqli_error($con);
+                        }
+                    } else {
+                        echo "<script>
+                            alert('File is too big!');
+                        </script>";   
+                    }
+                } else {
+                    echo "<script>
+                        alert('There is an error in this file!');
+                    </script>";  
+                }
+            } else {
+                echo "<script>
+                    alert('PNG, JPG, JPEG only!');
+                </script>";  
+            }
         }
     }
 }
@@ -109,7 +149,7 @@ function createUserDetailsId(){
     <div class="page">
         <div class="box form-box">
             <header>Sign Up</header>
-            <form name="spark_system" method="post" action="../../pages/admin/signupAdm.php" enctype="multipart/form-data">
+            <form name="spark_system" method="post" action="" enctype="multipart/form-data">
 
                 <div class="field input">
                     <label for="admUsername">Username</label>
@@ -132,9 +172,9 @@ function createUserDetailsId(){
                 </div>
 
                 <div class="card">
-                    <img src="../../pictures/default-avatar.png" id="profile-pic">
+                    <img src="../../pictures/default-avatar.png" id="profile-pic" style="margin-top: 10px; width: 20px; border-radius: 50%; object-fit: cover;">
                     <label for="input-file">Profile Picture</label>
-                    <input type="file" accept="image/jpeg, image/png, image/jpg" id="imput-file">
+                    <input type="file" name="image" accept="image/jpeg, image/png, image/jpg" id="imput-file">
                 </div>
 
                 <script>
