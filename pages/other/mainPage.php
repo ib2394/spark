@@ -231,6 +231,95 @@
           cursor: pointer;
         }
 
+        /*Auni Contact Us CSS*/
+        .contact-section {
+            padding: 20px;
+        }
+        .contact-header {
+            text-align: center;
+            font-size: 3em;
+            font-weight: bold;
+            color: black;
+            letter-spacing: 2px;
+            text-shadow: 2px 2px #666;
+            margin: 40px 0;
+        }
+        .contact-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .contact-info img {
+            width: 150px;
+            height: 150px;
+            border-radius: 15px; /* Slightly rounded corners */
+            margin-right: 20px;
+            border: 2px solid #BFACE2; /* Border color matching the background */
+            background-color: white; /* Ensures there's no black border */
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); /* Adds a shadow for better visual separation */
+        }
+        .contact-info div {
+            margin-left: 10px;
+            text-align: left;
+        }
+        .contact-name {
+            margin: 0;
+            font-size: 1.6em;
+            font-weight: bold;
+            color: #333;
+        }
+        .contact-phone {
+            margin: 0;
+            font-size: 1.2em;
+            color: #666;
+        }
+
+        /* (Aminah) About Us CSS */
+        .about-us{
+            min-height: 100vh;
+            padding: 80px 0px;
+            background-color: #BFACE2;
+        }
+        .container{
+            max-width: 1200px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 30px;
+            border-radius: 10px;
+            margin: 0px auto;
+        }
+        .about-image{
+            width: 50%;
+            overflow: hidden;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+        .about-image img{
+            display: block;
+            width: 85%;
+            height: auto;
+            margin-left: 40px;
+            transition: transform 0.3s ease;
+        }
+        .about-image:hover img{
+            transform: scale(1.2);
+        }
+        .about-content{
+            width: 50%;
+            margin-left: 40px;
+        }
+        .about-content h1{
+            color: black;
+            font-size: 34px;
+            margin-bottom: 20px;
+        }
+        .about-content p{
+            color: black;
+            font-size: 17px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
     </style>
 </head>
 <body>
@@ -254,7 +343,7 @@
         </div>
     </div>
 
-    <!-- Pricing Navbar  -->
+    <!-- (ib) Pricing Navbar  -->
     <body>
         <div class="section" id="pricing">
           <h1>Price for each size</h1>
@@ -278,9 +367,9 @@
       </div>
   </body>
 
-  <!-- Services that SPARK provided -->
+  <!-- (aminah) Services that SPARK provided -->
   <body>
-    <div class="wrapper" id="service">
+    <div class="section" id="service">
         <h2>SERVICES</h2>
         <hr>
         <div class="service">
@@ -297,6 +386,66 @@
         </div>
     </div>
   </body>
+
+      <!-- (auni) Contact Us  -->
+      <body>
+        <div class="section" id="contactus">
+          <div class="contact-section">
+            <h2 class="contact-header">Contact Us</h2>
+            
+            <div class="contact-info">
+                <img src="./public/ibtisam.png" alt="IBTISAM BINTI ASRUL HAFIZ">
+                <div>
+                    <p class="contact-name">IBTISAM BINTI ASRUL HAFIZ</p>
+                    <p class="contact-phone">(+6011-55507913)</p>
+                </div>
+            </div>
+            
+            <div class="contact-info">
+                <img src="./public/atiqah.jpg" alt="NUR ATIQAH ZULAIKA BINTI ISMAIL">
+                <div>
+                    <p class="contact-name">NUR ATIQAH ZULAIKA BINTI ISMAIL</p>
+                    <p class="contact-phone">(+6018-2139632)</p>
+                </div>
+            </div>
+
+            <div class="contact-info">
+                <img src="../../pictures/Auni.png" alt="NURUL AUNI BINTI MOHAMAD MOHLIS" width: 150px;
+                height: 100px;> 
+                <div>
+                    <p class="contact-name">NURUL AUNI BINTI MOHAMAD MOHLIS</p> 
+                    <p class="contact-phone">(+6019-8142770)</p>
+                </div>
+            </div>
+
+            <div class="contact-info">
+                <img src="./public/aminah.jpg" alt="SITI AMINAH BINIT AIDI">
+                <div>
+                    <p class="contact-name">SITI AMINAH BINIT AIDI</p>
+                    <p class="contact-phone">(+6019-58197775)</p>
+                </div>
+            </div>
+          </div>
+        </div>
+      </body>
+
+    <!-- (Aminah) About  -->
+    <body>
+      <div class="section" id="about">
+        <section class="about-us"> 
+            <div class="container">
+                <div class="about-image">
+                    <img src="../../pictures/logoParcel.png">
+                </div>
+                <div class="about-content">
+                    <h1>ABOUT US</h1>
+                    <p>SPARK SYSTEM was founded by a group of UiTM Raub students named Ibtisam, Atiqah, Aminah, and Auni. It was initially developed at UiTM Raub, where students discovered it. It is a mechanism that allows students to select whether to pick up their packages or have them delivered to their homes. After many thoughts and complaints, we decided to build this approach to make it easier for students to get their hands on their packages.</p>
+                </div>
+            </div>
+        </section>
+      </div>
+    </body>
+
 
     <!-- Help Desk -->
     <body>

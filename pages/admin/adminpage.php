@@ -2,7 +2,8 @@
     session_start();
     include ('../../config/config.php');
 
-    $adminid = $_SESSION['adminid'];
+    if (isset($_SESSION['adminid'])) {
+        $adminid = $_SESSION['adminid'];
 
     $sql = "SELECT * FROM admin WHERE adminid = '$adminid'";
 	$result = mysqli_query($con, $sql);
@@ -15,6 +16,10 @@
             exit();
         }
     }
+<<<<<<< Updated upstream
+=======
+}
+>>>>>>> Stashed changes
 ?>
 
 <!DOCTYPE html>
@@ -200,7 +205,7 @@
     <div class="navbar">
         <img class="logo" src="../../pictures/logoParcel.png" alt="Logo">
         <ul>
-            <li><a href="../../pages/admin/adminupdate.php">
+            <li><a href="#">
             <button type="button">UPDATE</button></a></li>
 
             <li><a href="#">
@@ -208,16 +213,28 @@
 
             <li><a href="../../pages/admin/admSearch.php">
             <button type="button">SEARCH</button></a></li>
-
-            <li><a href="#">
-            <button type="button">VIEWING</button></a></li>
+            
+            <li class="dropdown">
+                <a href="#">
+                <button type="button">VIEWING</button>
+                </a>
+                <div class="dropdown-content">
+                <a href="../../pages/admin/employeelist.php">Employee</a>
+                <a href="../../pages/admin/studentslist.php">Student</a>
+                </div>
+            </li>
+          
 
         </ul>
         
         <div class="dropdown">
             <img src="<?php echo $row['ppAdm']; ?>" alt="Avatar" class="admin-pic">
             <div class="dropdown-content">
+<<<<<<< Updated upstream
                 <a href="adminupdate.php">Edit Profile</a>
+=======
+                <a href="../../pages/admin/editProfileAdm.php">Edit Profile</a>
+>>>>>>> Stashed changes
                 <a href="../../pages/other/logout.php">Logout</a>
             </div>
         </div>

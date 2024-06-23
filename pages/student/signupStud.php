@@ -48,17 +48,27 @@ if(isset($_POST['submit'])){
                     //file size must be < 10MB
                     if($fileSize < 10485760) {
                         echo $sql;
+<<<<<<< Updated upstream
                         $fileNameNew = $AdmUsername.".".$fileActualExt;
+=======
+                        $fileNameNew = $studUsername.".".$fileActualExt;
+>>>>>>> Stashed changes
                         $fileDestination = '../../ppUser/ppStudent/'. $fileNameNew;
 
                         move_uploaded_file($fileTmpName, $fileDestination); //to upload file to a specific folder
 
                         /* execute SQL INSERT commands */
+<<<<<<< Updated upstream
                         $sql2 = "INSERT INTO student (studUsername, studname, studaddress, email, studphone, ppStud) VALUES ('$studUsername','$studname', '$studaddress', '$email', '$studphone', '$fileDestination')";
 
                         if (mysqli_query($con, $sql2)) {
                             // Set session variable for the student
                             $_SESSION['student'] = $studid;
+=======
+                        $sql2 = "INSERT INTO student (studUsername, studpass, studname, studaddress, email, studphone, ppStud) VALUES ('$studUsername','$studpass', '$studname', '$studaddress', '$email', $studphone, '$fileDestination')";
+
+                        if (mysqli_query($con, $sql2)) {
+>>>>>>> Stashed changes
                             echo "<script>alert('Succesfully registered!'); 
                                 window.location.href = 'loginStud.php';
                                 </script>";
@@ -84,58 +94,6 @@ if(isset($_POST['submit'])){
         }
     }
 }
-/* close db connection */
-mysqli_close($con);
-
-// create new user id
-function createUserId(){
-    include '../../config/config.php';
-
-    // Find the highest current user ID
-    $sqlSelectMaxId = "SELECT studUsername FROM student ORDER BY studUsername DESC LIMIT 1";
-    $result = mysqli_query($con, $sqlSelectMaxId);
-    if (!$result) {
-        die("Error: " . mysqli_error($con));
-    }
-
-    $row = mysqli_fetch_assoc($result);
-    $lastId = $row['studUsername'];
-    
-    // Extract the numeric part, increment it, and create the new ID
-    $numericPart = intval(substr($lastId, 1)); // assuming the prefix "U" is always 1 character
-    $newNumericPart = $numericPart + 1;
-    if ($newNumericPart < 10) {
-        $newUserId = 'U0' . $newNumericPart;
-    } else {
-        $newUserId = 'U' . $newNumericPart;
-    }
-    return $newUserId;
-}
-
-// create new user details id
-function createUserDetailsId(){
-    include '../../config/config.php';
-
-    // Find the highest current user details ID
-    $sqlSelectMaxId = "SELECT studUsername FROM parcel ORDER BY parcelid DESC LIMIT 1";
-    $result = mysqli_query($con, $sqlSelectMaxId);
-    if (!$result) {
-        die("Error: " . mysqli_error($con));
-    }
-
-    $row = mysqli_fetch_assoc($result);
-    $lastId = $row['studUsername'];
-    
-    // Extract the numeric part, increment it, and create the new ID
-    $numericPart = intval(substr($lastId, 2)); // assuming the prefix "UD" is always 2 characters
-    $newNumericPart = $numericPart + 1;
-    if ($newNumericPart < 10) {
-        $newUserId = 'UD0' . $newNumericPart;
-    } else {
-        $newUserId = 'UD' . $newNumericPart;
-    }
-    return $newUserId;
-}
 ?>
 
 <!DOCTYPE html>
@@ -147,6 +105,29 @@ function createUserDetailsId(){
         <link rel="stylesheet" href="../../css/style1.css">
         <title>Sign Up</title>
     </head>
+    <style>
+        .backbtn {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            align-items: center; /* Vertically center */
+            height: 10vh; /* Adjust height as needed */
+        }
+        
+        #backButton {
+            border: none;
+            background: none;
+            cursor: pointer;
+            width: 50px;
+            height: 50px;
+            padding: 0; /* Remove padding */
+            margin: 0; /* Remove margin */
+        }
+        
+        #backButton img {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
     <body>
         <div class="page">
             <div class="box form-box">
@@ -159,17 +140,22 @@ function createUserDetailsId(){
 
                     <div class="field input">
                         <label for="studpass">Password </label>
-                        <input type="password" name="studpass" autocomplete="off" required>
+                        <input type="password" name="studpass" autocomplete="off" minlength="8" placeholder="min 8 characters" required>
                     </div>
 
                     <div class="field input">
                         <label for="studname">Name</label>
-                        <input type="text" name="studname" autocomplete="off" required>
+                        <input type="text" name="studname" autocomplete="off" style="text-transform: uppercase" required>
                     </div>
+                    <script>
+                        document.getElementById('studname').addEventListener('input', function() {
+                            this.value = this.value.toUpperCase();
+                        });
+                    </script>
 
                     <div class="field input">
                         <label for="studaddress">Address </label>
-                        <input type="text" name="studaddress" autocomplete="off" required>
+                        <input type="text" name="studaddress" autocomplete="off" placeholder="09A 03 c09/2" pattern="\d{2}[A-Za-z] \d{2} [A-Za-z]\d{2}/\d" title="Please enter an address in the format 09A 03 c09/2" required>
                     </div>
 
                     <div class="field input">
@@ -179,13 +165,17 @@ function createUserDetailsId(){
 
                     <div class="field input">
                         <label for="studphone">Phone Number</label>
-                        <input type="text" name="studphone" autocomplete="off" required>
+                        <input type="text" name="studphone" autocomplete="off" placeholder="01X-XXXXXXXX" pattern="01\d-\d{7,8}" title="Please enter a phone number in the format 01X-XXXXXXXX" required>
                     </div>
 
                     <div class="card">
                         <img src="../../pictures/default-avatar.png" id="profile-pic" style="margin-top: 10px; width: 20px; border-radius: 50%; object-fit: cover;">
                         <label for="input-file">Profile Picture</label>
+<<<<<<< Updated upstream
                         <input type="file" name="image" accept="image/jpeg, image/png, image/jpg" id="imput-file">
+=======
+                        <input type="file" name="image" accept="image/jpeg, image/png, image/jpg" id="imput-file" required>
+>>>>>>> Stashed changes
                     </div>
 
                     <script>
@@ -206,5 +196,17 @@ function createUserDetailsId(){
                 </div>
             </div>
         </div>
+
+        <div class="backbtn">
+            <button id="backButton" type="button" >
+                <img src="../../pictures/back-button.png" alt="Back" style="width: 100%; height: 100%">
+            </button>
+        </div>
+        <script>
+            document.getElementById('backButton').addEventListener('click', function() {
+                window.history.back();
+            });
+        </script>
+
     </body>
 </html>

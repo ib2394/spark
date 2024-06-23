@@ -146,10 +146,44 @@ function createUserDetailsId(){
     <link rel="stylesheet" href="../../css/style1.css">
     <title>Sign Up</title>
 </head>
+<style>
+    .backbtn {
+        display: flex;
+        justify-content: center; /* Horizontally center */
+        align-items: center; /* Vertically center */
+        height: 3vh; /* Adjust height as needed */
+    }
+    
+    #backButton {
+        border: none;
+        background: none;
+        cursor: pointer;
+        width: 50px;
+        height: 50px;
+        padding: 0; /* Remove padding */
+        margin: 0; /* Remove margin */
+    }
+    
+    #backButton img {
+        width: 100%;
+        height: 100%;
+    }
+</style>
 <body>
     <div class="page">
+        <!--<div class="backbtn">
+            <button id="backButton" type="button" style="position: center; border: none; background: none; cursor: pointer; width: 50px; height: 50px;">
+                <img src="../../pictures/back-button.png" alt="Back" style="width: 100%; height: 100%">
+            </button>
+        </div>
+        <script>
+            document.getElementById('backButton').addEventListener('click', function() {
+                window.history.back();
+            });
+        </script> -->
+
         <div class="box form-box">
-            <header>Sign Up</header>
+            <header>Admin Sign Up</header>
             <form name="spark_system" method="post" action="" enctype="multipart/form-data">
 
                 <div class="field input">
@@ -159,23 +193,28 @@ function createUserDetailsId(){
 
                 <div class="field input">
                     <label for="admpass">Password </label>
-                    <input type="password" name="admpass" autocomplete="off" required>
+                    <input type="password" name="admpass" autocomplete="off" minlength="8" placeholder="min 8 characters" required>
                 </div>
 
                 <div class="field input">
                     <label for="admname">Full Name</label>
-                    <input type="text" name="admname" autocomplete="off" required>
+                    <input type="text" name="admname" autocomplete="off" style="text-transform: uppercase" required>
                 </div>
+                <script>
+                    document.getElementById('admname').addEventListener('input', function() {
+                        this.value = this.value.toUpperCase();
+                    });
+                </script>
 
                 <div class="field input">
                     <label for="admphone">Phone Number </label>
-                    <input type="text" name="admphone" autocomplete="off" required>
+                    <input type="text" name="admphone" autocomplete="off" pattern="01\d-\d{7,8}" title="Please enter a phone number in the format 01X-XXXXXXXX" required>
                 </div>
 
                 <div class="card">
                     <img src="../../pictures/default-avatar.png" id="profile-pic" style="margin-top: 10px; width: 20px; border-radius: 50%; object-fit: cover;">
                     <label for="input-file">Profile Picture</label>
-                    <input type="file" name="image" accept="image/jpeg, image/png, image/jpg" id="imput-file">
+                    <input type="file" name="image" accept="image/jpeg, image/png, image/jpg" id="imput-file" required>
                 </div>
 
                 <script>
@@ -203,7 +242,21 @@ function createUserDetailsId(){
             <div class="links">
                 Already a member? <a href="../../pages/admin/loginAdm.php">Login</a>
             </div>
+
         </div>
+
+        </div>
+
+        <div class="backbtn">
+            <button id="backButton" type="button" >
+                <img src="../../pictures/back-button.png" alt="Back" style="width: 100%; height: 100%">
+            </button>
+        </div>
+        <script>
+            document.getElementById('backButton').addEventListener('click', function() {
+                window.history.back();
+            });
+        </script>
     </div>
 </body>
 </html>

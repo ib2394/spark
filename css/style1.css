@@ -98,9 +98,6 @@ body{
 .dropdown a:hover{
     background-color: plum;
 }
-
-
-
 .Logo{
     width: 100%;
     margin-left: 100%;
@@ -151,4 +148,43 @@ body{
     margin-top: 100px;
     background-color: rgb(173, 172, 172, 0.801);
     box-shadow: 2px 4px 4pxx rgba(0.00, 0.00, 0.00, 0.644);
+}
+/* Additional CSS for beautifying the dropdown */
+.styled-select {
+    position: relative;
+    width: 100%;
+    height: 40px;
+    overflow: hidden;
+    background-color: #fff;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+}
+
+.styled-select select {
+    width: 100%;
+    height: 100%;
+    border: none;
+    padding: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    background: transparent;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+
+.styled-select:after {
+    content: "▼";
+    position: absolute;
+    top: 0;
+    right: 10px;
+    bottom: 0;
+    margin: auto;
+    font-size: 16px;
+    color: #999;
+    pointer-events: none;
+}
+
+.styled-select:hover:after {
+    color: #333;
 }

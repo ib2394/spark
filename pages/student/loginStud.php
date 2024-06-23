@@ -41,6 +41,29 @@
         <link rel="stylesheet" href="../../css/style1.css">
         <title>Login</title>
     </head>
+    <style>
+        .backbtn {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            align-items: center; /* Vertically center */
+            height: 5vh; /* Adjust height as needed */
+        }
+        
+        #backButton {
+            border: none;
+            background: none;
+            cursor: pointer;
+            width: 50px;
+            height: 50px;
+            padding: 0; /* Remove padding */
+            margin: 0; /* Remove margin */
+        }
+        
+        #backButton img {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
     <body>
         <div class="page">
             <div class="box form-box">
@@ -66,5 +89,16 @@
                 </form>
             </div>
         </div>
+
+        <div class="backbtn">
+            <button id="backButton" type="button" >
+                <img src="../../pictures/back-button.png" alt="Back" style="width: 100%; height: 100%">
+            </button>
+        </div>
+        <script>
+            document.getElementById('backButton').addEventListener('click', function() {
+                window.history.back();
+            });
+        </script>
     </body>
 </html>

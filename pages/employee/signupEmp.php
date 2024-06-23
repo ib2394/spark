@@ -94,6 +94,29 @@ if(isset($_POST['submit'])){
         <link rel="stylesheet" href="../../css/style1.css">
         <title>Sign Up</title>
     </head>
+    <style>
+        .backbtn {
+            display: flex;
+            justify-content: center; /* Horizontally center */
+            align-items: center; /* Vertically center */
+            height: 5vh; /* Adjust height as needed */
+        }
+        
+        #backButton {
+            border: none;
+            background: none;
+            cursor: pointer;
+            width: 50px;
+            height: 50px;
+            padding: 0; /* Remove padding */
+            margin: 0; /* Remove margin */
+        }
+        
+        #backButton img {
+            width: 100%;
+            height: 100%;
+        }
+    </style>
     <body>
         <div class="page">
             <div class="box form-box">
@@ -106,32 +129,47 @@ if(isset($_POST['submit'])){
 
                     <div class="field input">
                         <label for="emppass">Password </label>
-                        <input type="password" name="emppass" autocomplete="off" required>
+                        <input type="password" name="emppass" autocomplete="off" minlength="8" placeholder="min 8 characters" required>
                     </div>
 
                     <div class="field input">
                         <label for="empname">Full Name</label>
-                        <input type="text" name="empname" autocomplete="off" required>
+                        <input type="text" name="empname" autocomplete="off" style="text-transform: uppercase" required>
                     </div>
+                    <script>
+                        document.getElementById('empname').addEventListener('input', function() {
+                            this.value = this.value.toUpperCase();
+                        });
+                    </script>
 
                     <div class="field input">
                         <label for="empphone">Phone Number </label>
-                        <input type="text" name="empphone" autocomplete="off" required>
+                        <input type="text" name="empphone" autocomplete="off" placeholder="01X-XXXXXXXX" pattern="01\d-\d{7,8}" title="Please enter a phone number in the format 01X-XXXXXXXX" required>
                     </div>
 
                     <div class="field input">
                         <label for="jobtitle">Job Title </label>
+<<<<<<< Updated upstream
                         <input type="text" name="jobtitle" autocomplete="off" required>
                         <select>
                             <a>Delivery Boy</a>
                             <a>Management</a>
                         </select>
+=======
+                        <div class="styled-select">
+                            <select name="jobtitle" required>
+                                <option value="" disabled selected>Choose Job Title</option>
+                                <option value="Delivery Boy">Delivery Boy</option>
+                                <option value="Management">Management</option>
+                            </select>
+                        </div>
+>>>>>>> Stashed changes
                     </div>
 
                     <div class="card">
                         <img src="../../pictures/default-avatar.png" id="profile-pic" style="margin-top: 10px; width: 20px; border-radius: 50%; object-fit: cover;">
                         <label for="input-file">Profile Picture</label>
-                        <input type="file" name="image" accept="image/jpeg, image/png, image/jpg" id="input-file">
+                        <input type="file" name="image" accept="image/jpeg, image/png, image/jpg" id="input-file" required>
                     </div>
                     <script>
                         let profilePic = document.getElementById("profile-pic");
@@ -152,5 +190,17 @@ if(isset($_POST['submit'])){
                 </div>
             </div>
         </div>
+
+        <div class="backbtn">
+            <button id="backButton" type="button" >
+                <img src="../../pictures/back-button.png" alt="Back" style="width: 100%; height: 100%">
+            </button>
+        </div>
+        <script>
+            document.getElementById('backButton').addEventListener('click', function() {
+                window.history.back();
+            });
+        </script>
+
     </body>
 </html>

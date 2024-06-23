@@ -1,14 +1,19 @@
 <?php
     include ('../../config/config.php');
+<<<<<<< Updated upstream
     session_start();
     ## verify if the session user is employee
     //if(isset($_SESSION['empid']) == "empid" && $_SESSION['studUsername'] == "studUsername")
 
+=======
+    
+>>>>>>> Stashed changes
     $empid = $_SESSION['empid'];
 
     $sql = "SELECT * FROM employee WHERE empid = '$empid'";
 	$result = mysqli_query($con, $sql);
 	$row = mysqli_fetch_assoc($result);
+<<<<<<< Updated upstream
 
     if ($_SERVER['REQUEST_METHOD'] == "POST") {
         // Retrieve the logged-in studUsername from the session
@@ -18,7 +23,17 @@
         }
     }
 ?>
+=======
+>>>>>>> Stashed changes
 
+    if ($_SERVER['REQUEST_METHOD'] == "POST") {
+        // Retrieve the logged-in studUsername from the session
+        if (!isset($_SESSION['empid'])) {
+            echo "<script type='text/javascript'>alert('Employee Username is not set in the session');</script>";
+            exit();
+        }
+    }
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -162,12 +177,20 @@
         </ul>
         
         <div class="dropdown">
+<<<<<<< Updated upstream
             <img src="<?php echo $row['ppEmp']; ?>" alt="Avatar" class="admin-pic">
+=======
+            <img src="<?php echo $row['ppEmp']; ?>" alt="Avatar" class="emp-pic">
+>>>>>>> Stashed changes
             <div class="dropdown-content">
                 <a href="#">Edit Profile</a>
                 <a href="../../pages/other/logout.php">Logout</a>
             </div>
         </div>
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
     </div>
 
     <div class="content">
