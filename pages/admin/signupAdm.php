@@ -1,5 +1,5 @@
 <?php
-/* include db connection file syaaaa */
+session_start();
 include '../../config/config.php';
 
 if(isset($_POST['submit'])){
@@ -46,6 +46,7 @@ if(isset($_POST['submit'])){
                 if($fileError === 0) {
                     //file size must be < 10MB
                     if($fileSize < 10485760) {
+                        echo $sql;
                         $fileNameNew = $AdmUsername.".".$fileActualExt;
                         $fileDestination = '../../ppUser/ppAdmin/'. $fileNameNew;
 
@@ -198,6 +199,7 @@ function createUserDetailsId(){
                     <input type="submit" class="btn" name="submit" value="Sign Up" required>
                 </div>
             </form>
+            
             <div class="links">
                 Already a member? <a href="../../pages/admin/loginAdm.php">Login</a>
             </div>

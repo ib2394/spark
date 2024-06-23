@@ -5,10 +5,10 @@ include("../../config/config.php");
 session_start();
 
 // Establish database connection
-$con = mysqli_connect("localhost", 'root', '', "spark_system");
+/*$con = mysqli_connect("localhost", 'root', '', "spark_system");
 if (mysqli_connect_errno()) {
     die("Failed to connect to MySQL: " . mysqli_connect_error());
-}
+}*/
 
 $sql = "SELECT * FROM employee";
 $result = mysqli_query($con, $sql);

@@ -4,11 +4,19 @@
 
     $adminid = $_SESSION['adminid'];
 
-    $sql = "SELECT *
-	FROM admin WHERE adminid = '$adminid'";
+    $sql = "SELECT * FROM admin WHERE adminid = '$adminid'";
 	$result = mysqli_query($con, $sql);
 	$row = mysqli_fetch_assoc($result);
+
+    if ($_SERVER['REQUEST_METHOD'] == "POST") {
+        // Retrieve the logged-in studUsername from the session
+        if (!isset($_SESSION['adminid'])) {
+            echo "<script type='text/javascript'>alert('Admin Username is not set in the session');</script>";
+            exit();
+        }
+    }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -209,7 +217,7 @@
         <div class="dropdown">
             <img src="<?php echo $row['ppAdm']; ?>" alt="Avatar" class="admin-pic">
             <div class="dropdown-content">
-                <a href="#">Edit Profile</a>
+                <a href="adminupdate.php">Edit Profile</a>
                 <a href="../../pages/other/logout.php">Logout</a>
             </div>
         </div>

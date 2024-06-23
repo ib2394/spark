@@ -1,22 +1,18 @@
-
 <?php
-/* include db connection file syaaaa */
+session_start();
 include '../../config/config.php';
 
 if(isset($_POST['submit'])){
     /* capture values from HTML form */
     $studUsername = $_POST['studUsername'];
-    $studpass = $_POST['studpass'];
     $studname = $_POST['studname'];
     $studaddress = $_POST['studaddress'];
     $email = $_POST['email'];
     $studphone = $_POST['studphone'];
 
-    //Insert profile picture
-
     /* execute SQL SELECT command */
     $sql = "SELECT studUsername FROM student WHERE studUsername = '$studUsername'";
-    echo $sql;
+    //echo $sql;
     $query = mysqli_query($con, $sql);
 
     if (!$query) {
@@ -32,16 +28,59 @@ if(isset($_POST['submit'])){
             exit();
     }
     else{
-        /* execute SQL INSERT commands */
-        $sql2 = "INSERT INTO student (studUsername, studpass, studname, studaddress, email, studphone) VALUES ('$studUsername','$studpass', '$studname', '$studaddress', '$email','$studphone')";
+            // Image upload handling
+        if(isset($_FILES['image']) && $_FILES['image']['error'] == 0){
+            $file = $_FILES['image'];
 
-        if (mysqli_query($con, $sql2)) {
-            echo "<script>alert('Succesfully registered!'); 
-                window.location.href = 'loginStud.php';
-                </script>";
-            exit();
-        } else {
-            echo "Error: " . mysqli_error($con);
+            $fileName = $_FILES['image']['name'];
+            $fileTmpName = $_FILES['image']['tmp_name'];
+            $fileSize = $_FILES['image']['size'];
+            $fileError = $_FILES['image']['error'];
+            $fileType = $_FILES['image']['type'];
+
+            $fileExt = explode('.', $fileName);
+            $fileActualExt = strtolower(end($fileExt));
+
+            $allowed = array('jpg','jpeg','png');
+
+            if(in_array($fileActualExt, $allowed)) {
+                if($fileError === 0) {
+                    //file size must be < 10MB
+                    if($fileSize < 10485760) {
+                        echo $sql;
+                        $fileNameNew = $AdmUsername.".".$fileActualExt;
+                        $fileDestination = '../../ppUser/ppStudent/'. $fileNameNew;
+
+                        move_uploaded_file($fileTmpName, $fileDestination); //to upload file to a specific folder
+
+                        /* execute SQL INSERT commands */
+                        $sql2 = "INSERT INTO student (studUsername, studname, studaddress, email, studphone, ppStud) VALUES ('$studUsername','$studname', '$studaddress', '$email', '$studphone', '$fileDestination')";
+
+                        if (mysqli_query($con, $sql2)) {
+                            // Set session variable for the student
+                            $_SESSION['student'] = $studid;
+                            echo "<script>alert('Succesfully registered!'); 
+                                window.location.href = 'loginStud.php';
+                                </script>";
+                            exit();
+                        } else {
+                            echo "Error: " . mysqli_error($con);
+                        }
+                    } else {
+                        echo "<script>
+                            alert('File is too big!');
+                        </script>";   
+                    }
+                } else {
+                    echo "<script>
+                        alert('There is an error in this file!');
+                    </script>";  
+                }
+            } else {
+                echo "<script>
+                    alert('PNG, JPG, JPEG only!');
+                </script>";  
+            }
         }
     }
 }
@@ -112,7 +151,7 @@ function createUserDetailsId(){
         <div class="page">
             <div class="box form-box">
                 <header>Sign Up</header>
-                <form name="spark_system" method="post" action="../../pages/student/signupStud.php">
+                <form name="spark_system" method="post" action="" enctype="multipart/form-data">
                     <div class="field input">
                         <label for="studUsername">Username </label>
                         <input type="text" name="studUsername" utocomplete="off" required>
@@ -142,6 +181,21 @@ function createUserDetailsId(){
                         <label for="studphone">Phone Number</label>
                         <input type="text" name="studphone" autocomplete="off" required>
                     </div>
+
+                    <div class="card">
+                        <img src="../../pictures/default-avatar.png" id="profile-pic" style="margin-top: 10px; width: 20px; border-radius: 50%; object-fit: cover;">
+                        <label for="input-file">Profile Picture</label>
+                        <input type="file" name="image" accept="image/jpeg, image/png, image/jpg" id="imput-file">
+                    </div>
+
+                    <script>
+                        let profilePic = document.getElementById("profile-pic");
+                        let inputfile = document.getElementById("input-file");
+
+                        inputFile.onchange = function(){
+                            profilePic.src = URLcreateObjectURL(inputFile.files[0]);
+                        }
+                    </script>
 
                     <div class="field">
                         <input type="submit" class="btn" name="submit" value="Sign Up" required>

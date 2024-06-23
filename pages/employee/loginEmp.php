@@ -1,34 +1,35 @@
 <?php
-session_start();
+    session_start();
 
-include ('../../config/config.php');
+    include ('../../config/config.php');
 
-if($_SERVER['REQUEST_METHOD'] == "POST"){
-    $empUsername = $_POST['empUsername'];
-    $emppass = $_POST['emppass'];
+    if($_SERVER['REQUEST_METHOD'] == "POST"){
+        $empUsername = $_POST['empUsername'];
+        $emppass = $_POST['emppass'];
 
-    if(!empty($empUsername) && !empty($emppass) && !is_numeric($empUsername)){
-        $query = "SELECT * FROM employee WHERE empUsername = ? LIMIT 1";
-        $stmt = $con->prepare($query);
-        $stmt->bind_param("s", $empUsername);
-        $stmt->execute();
-        $result = $stmt->get_result();
+        if(!empty($empUsername) &&!empty($emppass) &&!is_numeric($empUsername)){
+            $query="select * from employee where empUsername='$empUsername' limit 1";
+            $result=mysqli_query($con, $query);
 
-        if($result && $result->num_rows > 0){
-            $user_data = $result->fetch_assoc();
+            if($result){
+                if($result && mysqli_num_rows($result)>0){
+                    $user_data=mysqli_fetch_assoc($result);
 
-            if($user_data['emppass'] == $emppass){
-                // Set the session variable
-                $_SESSION['empUsername'] = $user_data['empUsername'];
-                header("Location: employeepage.php");
-                die;
+                    if ($user_data['emppass'] == $emppass) {
+                        $_SESSION['empid'] = $user_data['empid'];  // Store studid in session
+                        $_SESSION['empUsername'] = $user_data['empUsername'];  // Store studUsername in session
+                        header("location: employeepage.php");  // Redirect to student page
+                        die;
+                    }
+                }
             }
+            echo "<script>alert('Oops! Wrong ID or Password')</script>";
         }
-        echo "<script>alert('Oops! Wrong ID or Password')</script>";
-    } else {
-        echo "<script>alert('Oops! Wrong ID or Password')</script>";
+        else{
+            echo "<script>alert('Oops! Wrong ID or Password')</script>";
+        }
     }
-}
+
 ?>
 
 <!DOCTYPE html>

@@ -1,28 +1,16 @@
 <?php
 session_start();
-include ('../../config/config.php');
-
+include '../../config/config.php';
+//echo $_SESSION['studid'];
 if ($_SERVER['REQUEST_METHOD'] == "POST") {
     // Retrieve the logged-in studid from the session
     if (!isset($_SESSION['studid'])) {
-        echo "<script type='text/javascript'>alert('Student ID is not set in the session');</script>";
+        echo "<script>alert('Student ID is not set in the session');</script>";
         exit();
     }
     $studid = $_SESSION['studid'];
-
-    $parcelid = $_POST['parcelid'];
+    $trackingNumber = $_POST['trackingNumber'];
     $courname = $_POST['courier_name'];
-    $paymethod = $_POST['paymethod'];
-
-    // Determine the payid based on the paymethod
-    if ($paymethod == 'Cash') {
-        $payid = 'P001';
-    } elseif ($paymethod == 'QR') {
-        $payid = 'P002';
-    } else {
-        echo "<script type='text/javascript'>alert('Invalid payment method');</script>";
-        exit();
-    }
 
     // Check if the studid exists in the student table
     $stmt_check_student = $con->prepare("SELECT studid FROM student WHERE studid = ?");
@@ -31,45 +19,28 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
     $result_student = $stmt_check_student->get_result();
 
     if ($result_student->num_rows == 0) {
-        echo "<script type='text/javascript'>alert('Student ID does not exist');</script>";
+        echo "<script>alert('Student ID does not exist');</script>";
         exit();
     }
     $stmt_check_student->close();
 
-    // Insert the payment information (only if not already present)
-    $stmt_check_payment = $con->prepare("SELECT payid FROM payment WHERE payid = ? AND paymethod = ?");
-    $stmt_check_payment->bind_param("ss", $payid, $paymethod);
-    $stmt_check_payment->execute();
-    $result_payment = $stmt_check_payment->get_result();
-
-    if ($result_payment->num_rows == 0) {
-        // Payment ID with the specific paymethod does not exist in the payment table, insert it
-        $stmt_insert_payment = $con->prepare("INSERT INTO payment (payid, paymethod) VALUES (?, ?)");
-        $stmt_insert_payment->bind_param("ss", $payid, $paymethod);
-        $stmt_insert_payment->execute();
-        $stmt_insert_payment->close();
-    }
-    $stmt_check_payment->close();
+    // Get current date and time
+    $currentDate = date('Y-m-d');
+    $currentTime = date('H:i:s'); 
 
     // Insert the data into the parcel table with the associated studid
-    $stmt_insert_parcel = $con->prepare("INSERT INTO parcel (parcelid, courname, studid, payid) VALUES (?, ?, ?, ?)");
-    if ($stmt_insert_parcel === false) {
-        die('Prepare failed: ' .htmlspecialchars($con->error));
+    $stmt_insert_parcel = $con->prepare("INSERT INTO parcel (trackingNumber, courname, studid, date, time) VALUES (?, ?, ?, ?, ?)");
+    $stmt_insert_parcel->bind_param("sssss", $trackingNumber, $courname, $studid, $currentDate, $currentTime);
+
+    if ($stmt_insert_parcel->execute()) {
+        echo "<script>alert('Successfully inserted');</script>";
+        // Redirect to a success page or do further processing
+    } else {
+        echo "Error: " . $stmt_insert_parcel->error;
     }
-
-    // Bind parameters and execute the statement
-    $stmt_insert_parcel->bind_param("ssss", $parcelid, $courname, $studid, $payid);
-    $stmt_insert_parcel->execute();
     $stmt_insert_parcel->close();
-
-    echo "<script type='text/javascript'>alert('Successfully inserted');</script>";
-} else {
-    echo "<script type='text/javascript'>alert('Please enter some valid information');</script>";
 }
 ?>
-
-
-
 
 
 <!DOCTYPE html>
@@ -77,40 +48,34 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Insert</title>
+    <title>Student Add Parcel</title>
     <style>
         /* Basic reset */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'poppins', sans-serif;
         }
 
         body {
-            font-family: 'poppins', sans-serif;
+            font-family: 'Poppins', sans-serif;
             background-color: #BFACE2;
             color: #333;
+            line-height: 1.6;
         }
 
         /* Banner styling */
         .banner {
-            background: #BFACE2;
-            color: black;
+            background: #645CBB;
+            color: white;
             padding: 1rem 2rem;
             text-align: center;
+            margin-bottom: 1rem;
         }
 
         .banner h1 {
             margin-bottom: 0.5rem;
-        }
-
-        .image {
-            width: 30px;
-            display: flex;
-            align-items: center;
-            cursor: pointer;
-            margin: 20px 10px;
+            font-size: 2rem;
         }
 
         .navbar {
@@ -129,25 +94,22 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
         .navbar ul {
             list-style: none;
             display: flex;
-            gap: 3rem;
+            gap: 1rem;
+            align-items: center;
         }
 
         .navbar ul button {
-            width: 200px;
             background: #645CBB;
-            color: black;
+            color: white;
             border: none;
-            text-align: center;
-            padding: 0.5rem 2rem;
-            margin: 20px 10px;
+            padding: 0.75rem 1.5rem;
             cursor: pointer;
             border-radius: 20px;
             font-size: 1rem;
-            position: relative;
         }
 
         .navbar ul button:hover {
-            background: #645CBB;
+            background: #524a99;
         }
 
         .navbar ul img.image {
@@ -157,87 +119,66 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
 
         /* Form styling */
         .form-container {
-            display: flex;
-            justify-content: center;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             padding: 2rem;
-            background-color: #BFACE2;
+            margin: 0 auto;
+            max-width: 600px;
         }
 
         .form-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem 2rem;
-            align-items: center;
+            grid-template-columns: 1fr;
+            gap: 1rem;
         }
 
         .input-group {
             position: relative;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .input-group input[type="text"], .input-group select {
-            padding: 0.75rem;
-            border: 2px solid #333;
-            border-radius: 4px;
-            font-size: 1rem;
-            background-color: #e0d4f7;
-            width: 100%; /* Ensure it matches the width of the container */
-        }
-
-        /* Remove unnecessary padding and margin for select elements */
-        .input-group select {
-            padding: 0.75rem; /* Match the input padding */
-            margin: 0; /* Remove extra margin */
+            margin-bottom: 1rem;
         }
 
         .input-group label {
+            display: block;
             margin-bottom: 0.5rem;
             font-size: 1rem;
             color: #333;
         }
+.input-group input[type="text"],
+        .input-group select {
+            width: 100%;
+            padding: 0.75rem;
+            font-size: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #f9f9f9;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-group input[type="text"]:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: #645CBB;
+        }
 
         .submit-btn {
-            grid-column: span 2;
-            display: flex;
-            justify-content: center;
+            text-align: center;
             margin-top: 1rem;
         }
 
         .submit-btn button {
             background: #645CBB;
-            color: black;
+            color: white;
             border: none;
-            padding: 0.75rem 1.5rem;
+            padding: 0.75rem 2rem;
             cursor: pointer;
             border-radius: 20px;
             font-size: 1rem;
+            transition: background 0.3s ease;
         }
 
         .submit-btn button:hover {
-            background: #645CBB;
-        }
-
-        button {
-            width: 200px;
-            padding: 15px;
-            margin: 20px 5px;
-            text-align: center;
-            border-radius: 25px;
-            color: black;
-            border: 2px;
-            font-size: 20px;
-            cursor: pointer;
-            font-weight: 600;
-        }
-
-        button:hover {
-            background-color: #645CBB;
-            transition: 0.3s;
-        }
-
-        button:hover {
-            color: white;
+            background: #524a99;
         }
     </style>
 </head>
@@ -247,23 +188,24 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
         <div class="navbar">
             <img class="logo" src="../../pictures/logoParcel.png" alt="Logo">
             <ul>
-                <li><a href="../../pages/student/studentinsert.php"><button type="button">ADD PARCEL</button></a></li>
-                <li><a href="../../pages/student/studentupdate.php"><button type="button">EDIT PARCEL</button></a></li>
-                <button type="button">REMOVE</button>
-                <button type="button">SEARCH</button>
-                <button type="button">VIEWING</button>
-                <img class="image" src="../../pictures/home.png" alt="Home">
+                <li><a href="studentinsert.php"><button type="button">ADD PARCEL</button></a></li>
+                <li><a href="studentupdate.php"><button type="button">EDIT PARCEL</button></a></li>
+                <li><button type="button">REMOVE</button></li>
+                <li><button type="button">SEARCH</button></li>
+                <li><button type="button">VIEWING</button></li>
+                <li><img class="image" src="../../pictures/home.png" alt="Home"></li>
             </ul>
         </div>
     </div>
     <div class="form-container">
-        <form action="../../pages/student/studentinsert.php" method="post" class="form-grid">
+        <form action="studentinsert.php" method="post" class="form-grid">
             <div class="input-group">
-                <input type="text" name="parcelid" required>
-                <label for="parcelid">Parcel ID :</label>
+                <label for="trackingNumber">Tracking Number :</label>
+                <input type="text" id="trackingNumber" name="trackingNumber" required>
             </div>
             <div class="input-group">
-                <select name="courier_name" required>
+                <label for="courier_name">Courier Name :</label>
+                <select id="courier_name" name="courier_name" required>
                     <option value="" disabled selected>Select Courier Name</option>
                     <option value="JNT">JNT</option>
                     <option value="DHL">DHL</option>
@@ -271,15 +213,6 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
                     <option value="POSLAJU">POSLAJU</option>
                     <option value="SHOPEEEXPRESS">SHOPEEEXPRESS</option>
                 </select>
-                <label for="courier_name">Courier Name :</label>
-            </div>
-            <div class="input-group">
-                <select name="paymethod" required>
-                    <option value="" disabled selected>Select Payment Method</option>
-                    <option value="CASH">CASH</option>
-                    <option value="QR">QR</option>
-                </select>
-                <label for="paymethod">Payment Method :</label>
             </div>
             <div class="submit-btn">
                 <button type="submit">ADD</button>

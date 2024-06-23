@@ -1,42 +1,35 @@
 <?php
-session_start();
-include ('../../config/config.php');
+    session_start();
 
-if ($_SERVER['REQUEST_METHOD'] == "POST") {
-    $AdmUsername = $_POST['admUsername'];
-    $admpass = $_POST['admpass'];
+    include ('../../config/config.php');
 
-    // Basic validation
-    if (!empty($AdmUsername) && !empty($admpass) && !is_numeric($AdmUsername)) {
-        // Prepare the SQL statement to prevent SQL injection
-        $stmt = $con->prepare("SELECT * FROM admin WHERE admUsername = ? LIMIT 1");
-        $stmt->bind_param("s", $AdmUsername);
-        $stmt->execute();
-        $result = $stmt->get_result();
+    if($_SERVER['REQUEST_METHOD'] == "POST"){
+        $admUsername = $_POST['admUsername'];
+        $admpass = $_POST['admpass'];
 
-        if ($result) {
-            if ($result->num_rows > 0) {
-                $user_data = $result->fetch_assoc();
+        if(!empty($admUsername) &&!empty($admpass) &&!is_numeric($admUsername)){
+            $query="select * from admin where admUsername='$admUsername' limit 1";
+            $result=mysqli_query($con, $query);
 
-                // Verify the password
-                if ($user_data['admpass'] == $admpass) {
-                    // Set session variable for adminid
-                    $_SESSION['adminid'] = $user_data['adminid'];
+            if($result){
+                if($result && mysqli_num_rows($result)>0){
+                    $user_data=mysqli_fetch_assoc($result);
 
-                    // Redirect to admin page
-                    header("Location: adminpage.php");
-                    die();
+                    if ($user_data['admpass'] == $admpass) {
+                        $_SESSION['adminid'] = $user_data['adminid'];  // Store studid in session
+                        $_SESSION['empUsername'] = $user_data['empUsername'];  // Store studUsername in session
+                        header("location: adminpage.php");  // Redirect to student page
+                        die;
+                    }
                 }
             }
+            echo "<script>alert('Oops! Wrong ID or Password')</script>";
         }
-
-        // Invalid login credentials
-        echo "<script>alert('Oops! Wrong ID or Password')</script>";
-    } else {
-        // Invalid input
-        echo "<script>alert('Oops! Wrong ID or Password')</script>";
+        else{
+            echo "<script>alert('Oops! Wrong ID or Password')</script>";
+        }
     }
-}
+
 ?>
 
 <!DOCTYPE html>
@@ -67,6 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
                     <div class="field">
                         <input type="submit" class="btn"name="submit" value="Login" required>
                     </div>
+                    
                     <div class="links">
                         Don't have account? <a href="../../pages/admin/signupAdm.php">Sign Up</a>
                     </div>

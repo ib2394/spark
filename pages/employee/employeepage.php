@@ -1,13 +1,22 @@
 <?php
-    session_start();
     include ('../../config/config.php');
+    session_start();
+    ## verify if the session user is employee
+    //if(isset($_SESSION['empid']) == "empid" && $_SESSION['studUsername'] == "studUsername")
 
     $empid = $_SESSION['empid'];
 
-    $sql = "SELECT *
-	FROM employee WHERE empid = '$empid'";
+    $sql = "SELECT * FROM employee WHERE empid = '$empid'";
 	$result = mysqli_query($con, $sql);
 	$row = mysqli_fetch_assoc($result);
+
+    if ($_SERVER['REQUEST_METHOD'] == "POST") {
+        // Retrieve the logged-in studUsername from the session
+        if (!isset($_SESSION['empid'])) {
+            echo "<script type='text/javascript'>alert('employee Username is not set in the session');</script>";
+            exit();
+        }
+    }
 ?>
 
 <!DOCTYPE html>
@@ -87,9 +96,90 @@
             width: 100px;
             height: 100px;
         }
+        //for dropdown profile
+        .dropdown {
+            position: relative;
+            display: inline-block;
+            margin-left: -40%;
+        }
+
+        .dropdown img {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            cursor: pointer;
+            margin-left: -40%;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #f9f9f9;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+            
+        }
+
+        .dropdown-content a {
+            color: black;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            
+        }
+
+        .dropdown-content a:hover {
+            background-color: #f1f1f1;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+            margin-left: -7%;
+        }
     </style>
 </head>
+
 <body>
+    <div class="header">
+        EMPLOYEE
+    </div>
+    <div class="navbar">
+        <img class="logo" src="../../pictures/logoParcel.png" alt="Logo">
+        <ul>
+            <li><a href="../../pages/employee/employeeupdate.php">
+            <button type="button">UPDATE</button></a></li>
+
+            <li><a href="#">
+            <button type="button">REMOVE</button></a></li>
+
+            <li><a href="../../pages/admin/admSearch.php">
+            <button type="button">SEARCH</button></a></li>
+
+            <li><a href="#">
+            <button type="button">VIEW</button></a></li>
+
+        </ul>
+        
+        <div class="dropdown">
+            <img src="<?php echo $row['ppEmp']; ?>" alt="Avatar" class="admin-pic">
+            <div class="dropdown-content">
+                <a href="#">Edit Profile</a>
+                <a href="../../pages/other/logout.php">Logout</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="content">
+        <h1>WELCOME TO EMPLOYEE PAGE</h1>
+        <div class="icon">
+            <img src="../../pictures/employee.png" alt="Employee Icon">
+        </div>
+    </div>
+</div>
+</body>
+
+<!--<body>
     <div class="header">
         EMPLOYEE
     </div>
@@ -105,7 +195,7 @@
     </div>
 
     <div class="dropdown">
-        <img src="<?php echo $row['ppEmp']; ?>" alt="Avatar" class="admin-pic">
+        <img src="<?php echo $row['ppEmp']; ?>" alt="Avatar" class="emp-pic">
         <div class="dropdown-content">
             <a href="#">Edit Profile</a>
             <a href="../../pages/other/logout.php">Logout</a>
@@ -118,5 +208,5 @@
             <img src="../../pictures/employee icon.png" alt="Employee Icon">
         </div>
     </div>
-</body>
+</body> -->
 </html>
