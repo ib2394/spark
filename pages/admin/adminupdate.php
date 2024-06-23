@@ -4,7 +4,7 @@ include ('../../config/config.php');
 
 // Check if the admin ID is stored in session
 if (isset($_SESSION['adminid'])) {
-    $session_adminid = $_SESSION['adminid'];
+    $adminid = $_SESSION['adminid'];
 
     if ($_SERVER['REQUEST_METHOD'] == "POST") {
         // Fetch POST data
@@ -36,9 +36,7 @@ if (isset($_SESSION['adminid'])) {
 
         $stmt_check_admin->close();
     }
-} else {
-    echo "<script type='text/javascript'>alert('No admin ID found in session. Please login again.');</script>";
-}
+} 
 ?>
 
 

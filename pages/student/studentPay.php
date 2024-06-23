@@ -11,8 +11,49 @@ if (!isset($_SESSION['studid'])) {
 // Get the student username from session
 $studid = $_SESSION['studid'];
 
+// Initialize total price
+$totalPrice = 0;
+
+// Define size prices
+$sizePrices = [
+    'small' => 1,
+    'medium' => 2,
+    'large' => 3,
+];
+/*if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $selectedParcels = isset($_POST['parcels']) ? $_POST['parcels'] : [];
+    $totalPrice = 0;
+
+    // Decode JSON data and calculate total price
+    $parcels = array_map('json_decode', $selectedParcels);
+    foreach ($parcels as $parcel) {
+        // Assuming you have a function to get price based on size
+        $price = getPriceBysize($parcel->size);
+        $totalPrice += $price;
+    }
+}*/
+
+// Check if parcels are selected
+if (isset($_POST['parcels'])) {
+    $selectedParcels = explode(',', $_POST['parcels']);
+
+    // Prepare a query to fetch the sizes of the selected parcels
+    $parcelIds = implode("','", array_map('mysqli_real_escape_string', $selectedParcels));
+    $sizeQuery = "SELECT trackingNumber, size FROM parcel WHERE trackingNumber IN ('$parcelIds') AND studid = '$studid' AND payStatus = 'UNPAID'";
+    $sizeResult = mysqli_query($con, $sizeQuery);
+
+    if ($sizeResult) {
+        // Calculate the total price
+        while ($row = mysqli_fetch_assoc($sizeResult)) {
+            $totalPrice += $sizePrices[strtolower($row['size'])];
+        }
+    } else {
+        echo "<script type='text/javascript'>alert('Error fetching parcel sizes.');</script>";
+    }
+}
+
 // Check if the form is submitted
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_FILES['proofFile'])) {
     // Handle file upload for payment proof
     $proofFile = $_FILES['proofFile'];
     $proofFileName = $_FILES['proofFile']['name'];
@@ -38,9 +79,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
                 // Insert payment method into 'payments' table
                 $payMethod = mysqli_real_escape_string($con, $_POST['payMethod']);
-                $selectedParcels = isset($_POST['parcels']) ? explode(',', $_POST['parcels']) : [];
                 foreach ($selectedParcels as $trackingNumber) {
-                    $insertPaymentQuery = "INSERT INTO payments (trackingNumber, studUsername, payMethod) VALUES ('$trackingNumber', '$studUsername', '$payMethod')";
+                    $insertPaymentQuery = "INSERT INTO payments (trackingNumber, studUsername, payMethod) VALUES ('$trackingNumber', '$studid', '$payMethod')";
                     if (mysqli_query($con, $insertPaymentQuery)) {
                         echo "<script type='text/javascript'>alert('Payment method saved successfully');</script>";
                     } else {
@@ -49,7 +89,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 }
 
                 // Update proof of payment location in 'parcel' table
-                $updateParcelQuery = "UPDATE parcel SET proofFile = '$fileDestination' WHERE trackingNumber IN ('" . implode("','", $selectedParcels) . "') AND studUsername = '$studUsername'";
+                $updateParcelQuery = "UPDATE parcel SET proofFile = '$fileDestination' WHERE trackingNumber IN ('" . implode("','", $selectedParcels) . "') AND studUsername = '$studid'";
                 if (mysqli_query($con, $updateParcelQuery)) {
                     echo "<script type='text/javascript'>alert('Proof of payment saved successfully');</script>";
                 } else {
@@ -67,6 +107,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } else {
         echo "<script type='text/javascript'>alert('You cannot upload files of this type!');</script>";
     }
+
+    /*function getPriceBysizer($size) {
+        // Assuming you have a predefined price list or you fetch it from the database
+        $priceList = [
+            'small' => 1.00,
+            'medium' => 2.00,
+            'large' => 3.00,
+        ];
+    
+        return $priceList[$price] ?? 0;
+    }*/
+    
 }
 ?>
 
@@ -155,6 +207,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         </div>
         <div class="payment-form">
             <h2>Pay Selected Parcels</h2>
+            <p>Total Price: $<?php echo number_format($totalPrice, 2); ?></p>
             <form method="post" action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" enctype="multipart/form-data">
                 <div class="form-group">
                     <label for="payMethod">Payment Method:</label>
@@ -174,6 +227,3 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </div>
 </body>
 </html>
-
-
-

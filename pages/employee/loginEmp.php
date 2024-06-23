@@ -18,9 +18,9 @@ if($_SERVER['REQUEST_METHOD'] == "POST"){
             $user_data = $result->fetch_assoc();
 
             if($user_data['emppass'] == $emppass){
-                // Set the session variable
-                $_SESSION['empUsername'] = $user_data['empUsername'];
-                header("Location: employeepage.php");
+                $_SESSION['empid'] = $user_data['empid'];  // Store empid in session
+                $_SESSION['empUsername'] = $user_data['empUsername'];  // Store empUsername in session
+                header("location: employeepage.php");  // Redirect to student page
                 die;
             }
         }

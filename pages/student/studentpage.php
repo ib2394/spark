@@ -1,6 +1,6 @@
 <?php
     include ('../../config/config.php');
-
+    session_start();
     if ($_SERVER['REQUEST_METHOD'] == "POST") {
         // Retrieve the logged-in studUsername from the session
         if (!isset($_SESSION['studid'])) {
@@ -18,24 +18,27 @@
     <title>Student Page</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #BFACE2;
+            background-color: #f9f9f9;
+            color: #333;
         }
         .header {
-            background-color: #BFACE2;
+            background-color: #111;
+            color: #fff;
             padding: 20px;
             text-align: center;
             font-size: 24px;
             font-weight: bold;
-            color: black;
         }
         .navbar {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 0.5rem 2rem;
+            padding: 1rem 2rem;
+            background-color: #111;
+            color: #fff;
         }
         .navbar ul {
             list-style: none;
@@ -45,8 +48,15 @@
         .navbar ul li {
             display: inline;
         }
+        .navbar a {
+            text-decoration: none;
+            color: #fff;
+        }
         .navbar a:hover {
-            background: #645CBB;
+            background-color: #645CBB;
+            border-radius: 25px;
+            padding: 15px 30px; /* increased padding for larger clickable area */
+            transition: background-color 0.3s;
         }
         .navbar img.logo {
             width: 120px;
@@ -54,75 +64,106 @@
         }
         .image {
             width: 30px;
-            display: flex;
-            align-items: center;
             cursor: pointer;
-            margin: 20px 10px;
+            margin: 0 10px;
         }
         .content {
             padding: 60px;
             text-align: center;
-            background-color: white;
         }
         .content h1 {
             font-size: 36px;
-            color: black;
-            font-family: Archivo Black;
+            font-weight: bold;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .content h1 img {
+            width: 60px;
+            margin-right: 10px;
         }
         .icon {
-            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
         }
         .icon img {
             width: 100px;
             height: 100px;
         }
-        button{
-            width: 200px;
-            padding: 15px;
-            margin: 20px 5px;
+        .logout-button {
             text-align: center;
+            margin-top: 20px;
+        }
+        button {
+            padding: 15px 30px;
+            font-size: 18px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
             border-radius: 25px;
-            color: black;
-            border: 2px;
-            font-size: 20px;
             cursor: pointer;
-            font-weight: 600;
+            transition: background-color 0.3s, transform 0.2s;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
-        button:hover{
-            background-color: #645CBB;
-            transition: 0.3s;
+        button:hover {
+            background-color: #0056b3;
+            transform: translateY(-2px); /* slight lift on hover */
         }
-        button:hover{
-            color: white;
-
+        .benefits {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin-top: 40px;
+        }
+        .benefits .benefit {
+            text-align: center;
+        }
+        .benefits .benefit img {
+            width: 150px;
+            margin-bottom: 10px;
+        }
+        .benefits .benefit p {
+            font-size: 20px;
+            color: #666;
         }
     </style>
 </head>
 <body>
-    <div class="header">
-        STUDENT
-    </div>
     <div class="navbar">
         <img class="logo" src="../../pictures/logoParcel.png" alt="Logo">
         <ul>
-            <li><a href="../../pages/student/studentinsert.php"><button type="button">INSERT</button></a></li>
-            <li><a href="../../pages/student/studentupdate.php"><button type="button">UPDATE</button></a></li>
-            <li><button type="button">REMOVE</button></li>
-            <li><a href="../../pages/student/viewPay.php"><button type="button">PAY</button></a></li>
-            <li><button type="button">VIEWING</button></li>
+            <li><a href="../../pages/student/studentinsert.php">INSERT</a></li>
+            <li><a href="../../pages/student/studentupdate.php">UPDATE</a></li>
+            <li><a href="#">REMOVE</a></li>
+            <li><a href="../../pages/student/viewPay.php">PAY</a></li>
+            <li><a href="../../pages/student/parcellist.php">VIEWING</a></li>
         </ul>
         <img class="image" src="../../pictures/home.png" alt="Home">
     </div>
     <div class="content">
-        <h1>WELCOME TO STUDENT PAGE</h1>
-        <div class="icon">
-            <img src="../../pictures/student icon.png" alt="Student Icon">
+        <h1><img src="../../pictures/student icon.png" alt="Student Icon"> WELCOME TO STUDENT PAGE</h1>
+        
+        <div class="benefits">
+            <div class="benefit">
+                <img src="../../pictures/parcel.png" alt="Parcel">
+                <p>SPARK. The best way to place your parcels you love.</p>
+            </div>
+            <div class="benefit">
+                <img src="../../pictures/fast.png" alt="Fast">
+                <p>Fast delivery service for all your parcels.</p>
+            </div>
+            <div class="benefit">
+                <img src="../../pictures/employeetask.png" alt="Employee Task">
+                <p>Track your parcels with ease using our Employee Task feature.</p>
+            </div>
         </div>
     </div>
     <div class="logout-button">
-    <form action="../../pages/other/mainPage.php" method="post">
-        <button type="submit">Logout</button>
-    </form>
+        <form action="../../pages/other/mainPage.php" method="post">
+            <button type="submit">Logout</button>
+        </form>
     </div>
 </body>
 </html>

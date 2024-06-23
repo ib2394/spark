@@ -1,20 +1,20 @@
-
 <?php
-/* include db connection file syaaaa */
 session_start();
 include '../../config/config.php';
 
 if(isset($_POST['submit'])){
     /* capture values from HTML form */
-    $studid = $_POST['studid'];
+    $studUsername = $_POST['studUsername'];
     $studpass = $_POST['studpass'];
     $studname = $_POST['studname'];
     $studaddress = $_POST['studaddress'];
     $email = $_POST['email'];
     $studphone = $_POST['studphone'];
 
+    //Insert profile picture
+
     /* execute SQL SELECT command */
-    $sql = "SELECT studid FROM student WHERE studid = '$studid'";
+    $sql = "SELECT studUsername FROM student WHERE studUsername = '$studUsername'";
     echo $sql;
     $query = mysqli_query($con, $sql);
 
@@ -32,7 +32,7 @@ if(isset($_POST['submit'])){
     }
     else{
         /* execute SQL INSERT commands */
-        $sql2 = "INSERT INTO student (studid, studpass, studname, studaddress, email, studphone) VALUES ('$studid','$studpass', '$studname', '$studaddress', '$email','$studphone')";
+        $sql2 = "INSERT INTO student (studUsername, studpass, studname, studaddress, email, studphone) VALUES ('$studUsername','$studpass', '$studname', '$studaddress', '$email','$studphone')";
 
         if (mysqli_query($con, $sql2)) {
             echo "<script>alert('Succesfully registered!'); 
@@ -52,14 +52,14 @@ function createUserId(){
     include '../../config/config.php';
 
     // Find the highest current user ID
-    $sqlSelectMaxId = "SELECT studid FROM student ORDER BY studid DESC LIMIT 1";
+    $sqlSelectMaxId = "SELECT studUsername FROM student ORDER BY studUsername DESC LIMIT 1";
     $result = mysqli_query($con, $sqlSelectMaxId);
     if (!$result) {
         die("Error: " . mysqli_error($con));
     }
 
     $row = mysqli_fetch_assoc($result);
-    $lastId = $row['studid'];
+    $lastId = $row['studUsername'];
     
     // Extract the numeric part, increment it, and create the new ID
     $numericPart = intval(substr($lastId, 1)); // assuming the prefix "U" is always 1 character
@@ -77,14 +77,14 @@ function createUserDetailsId(){
     include '../../config/config.php';
 
     // Find the highest current user details ID
-    $sqlSelectMaxId = "SELECT studid FROM parcel ORDER BY parcelid DESC LIMIT 1";
+    $sqlSelectMaxId = "SELECT studUsername FROM parcel ORDER BY parcelid DESC LIMIT 1";
     $result = mysqli_query($con, $sqlSelectMaxId);
     if (!$result) {
         die("Error: " . mysqli_error($con));
     }
 
     $row = mysqli_fetch_assoc($result);
-    $lastId = $row['studid'];
+    $lastId = $row['studUsername'];
     
     // Extract the numeric part, increment it, and create the new ID
     $numericPart = intval(substr($lastId, 2)); // assuming the prefix "UD" is always 2 characters
@@ -113,8 +113,8 @@ function createUserDetailsId(){
                 <header>Sign Up</header>
                 <form name="spark_system" method="post" action="../../pages/student/signupStud.php">
                     <div class="field input">
-                        <label for="studid">Username </label>
-                        <input type="text" name="studid" utocomplete="off" required>
+                        <label for="studUsername">Username </label>
+                        <input type="text" name="studUsername" utocomplete="off" required>
                     </div>
 
                     <div class="field input">

@@ -7,7 +7,7 @@
         $studUsername = $_POST['studUsername'];
         $studpass = $_POST['studpass'];
 
-        if(!empty($studUsername) && !empty($studpass) && !is_numeric($studUsername)){
+        if(!empty($studUsername) &&!empty($studpass) &&!is_numeric($studUsername)){
             $query="select * from student where studUsername='$studUsername' limit 1";
             $result=mysqli_query($con, $query);
 
@@ -17,6 +17,7 @@
 
                     if ($user_data['studpass'] == $studpass) {
                         $_SESSION['studid'] = $user_data['studid'];  // Store studid in session
+                        $_SESSION['studUsername'] = $user_data['studUsername'];  // Store studUsername in session
                         header("location: studentpage.php");  // Redirect to student page
                         die;
                     }
@@ -28,7 +29,6 @@
             echo "<script>alert('Oops! Wrong ID or Password')</script>";
         }
     }
-
 
 ?>
 

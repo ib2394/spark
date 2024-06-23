@@ -1,28 +1,25 @@
-<?php
+ <?php
 session_start();
 include '../../config/config.php';
 
 if ($_SERVER['REQUEST_METHOD'] == "POST") {
     // Retrieve the logged-in studid from the session
     if (!isset($_SESSION['studid'])) {
-        echo $_SESSION['studid'];
-        echo "<script type='text/javascript'>alert('Student Username is not set in the session');</script>";
+        echo "<script>alert('Student ID is not set in the session');</script>";
         exit();
     }
     $studid = $_SESSION['studid'];
-
     $trackingNumber = $_POST['trackingNumber'];
     $courname = $_POST['courier_name'];
 
-
     // Check if the studid exists in the student table
-    $stmt_check_student = $con->prepare("SELECT studid FROM student WHERE studid =?");
+    $stmt_check_student = $con->prepare("SELECT studid FROM student WHERE studid = ?");
     $stmt_check_student->bind_param("s", $studid);
     $stmt_check_student->execute();
     $result_student = $stmt_check_student->get_result();
 
     if ($result_student->num_rows == 0) {
-        echo "<script type='text/javascript'>alert('Student Username does not exist');</script>";
+        echo "<script>alert('Student ID does not exist');</script>";
         exit();
     }
     $stmt_check_student->close();
@@ -31,17 +28,20 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
     $currentDate = date('Y-m-d');
     $currentTime = date('H:i:s'); 
 
-     // Insert the data into the parcel table with the associated studid
-     $stmt_insert_parcel = $con->prepare("INSERT INTO parcel (trackingNumber, courname, payid, studid, date, time) VALUES (?,?,?,?,?,?)");
-     $stmt_insert_parcel->bind_param("ssssss", $trackingNumber, $courname, $payid, $studid, $currentDate, $currentTime);
-     $stmt_insert_parcel->execute();
-     $stmt_insert_parcel->close();
+    // Insert the data into the parcel table with the associated studid
+    $stmt_insert_parcel = $con->prepare("INSERT INTO parcel (trackingNumber, courname, studid, date, time) VALUES (?, ?, ?, ?, ?)");
+    $stmt_insert_parcel->bind_param("sssss", $trackingNumber, $courname, $studid, $currentDate, $currentTime);
 
-    echo "<script type='text/javascript'>alert('Successfully inserted');</script>";
-} else {
-    echo "<script type='text/javascript'>alert('Please enter some valid information');</script>";
+    if ($stmt_insert_parcel->execute()) {
+        echo "<script>alert('Successfully inserted');</script>";
+        // Redirect to a success page or do further processing
+    } else {
+        echo "Error: " . $stmt_insert_parcel->error;
+    }
+    $stmt_insert_parcel->close();
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -58,24 +58,28 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
         }
 
         body {
-            font-family: 'Poppins', sans-serif;
-            background-color: #BFACE2;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f5f5f5;
             color: #333;
             line-height: 1.6;
+            margin: 0;
+            padding: 0;
         }
 
         /* Banner styling */
         .banner {
-            background: #645CBB;
+            background: #333;
             color: white;
             padding: 1rem 2rem;
             text-align: center;
-            margin-bottom: 1rem;
+            border-bottom: 3px solid #222;
         }
 
         .banner h1 {
             margin-bottom: 0.5rem;
             font-size: 2rem;
+            font-weight: bold;
+            letter-spacing: 1px;
         }
 
         .navbar {
@@ -83,7 +87,8 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
             justify-content: space-between;
             align-items: center;
             padding: 1rem 2rem;
-            background: #BFACE2;
+            background: #f5f5f5;
+            border-bottom: 1px solid #ddd;
         }
 
         .navbar img.logo {
@@ -99,17 +104,18 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
         }
 
         .navbar ul button {
-            background: #645CBB;
+            background: #333;
             color: white;
             border: none;
             padding: 0.75rem 1.5rem;
             cursor: pointer;
             border-radius: 20px;
             font-size: 1rem;
+            transition: background 0.3s ease;
         }
 
         .navbar ul button:hover {
-            background: #524a99;
+            background: #222;
         }
 
         .navbar ul img.image {
@@ -123,7 +129,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             padding: 2rem;
-            margin: 0 auto;
+            margin: 2rem auto;
             max-width: 600px;
         }
 
@@ -143,6 +149,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
             margin-bottom: 0.5rem;
             font-size: 1rem;
             color: #333;
+            font-weight: bold;
         }
 
         .input-group input[type="text"],
@@ -152,14 +159,14 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
             font-size: 1rem;
             border: 1px solid #ddd;
             border-radius: 4px;
-            background-color: #f9f9f9;
+            background-color: #f5f5f5;
             transition: border-color 0.3s ease;
         }
 
         .input-group input[type="text"]:focus,
         .input-group select:focus {
             outline: none;
-            border-color: #645CBB;
+            border-color: #333;
         }
 
         .submit-btn {
@@ -168,7 +175,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
         }
 
         .submit-btn button {
-            background: #645CBB;
+            background: #333;
             color: white;
             border: none;
             padding: 0.75rem 2rem;
@@ -179,21 +186,21 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
         }
 
         .submit-btn button:hover {
-            background: #524a99;
+            background: #222;
         }
     </style>
 </head>
 <body>
     <div class="banner">
-        <h1>STUDENT</h1>
+        
         <div class="navbar">
-            <img class="logo" src="../../pictures/logoParcel.png" alt="Logo">
+        <a href="studentpage.php"><img class="logo" src="../../pictures/logoParcel.png" alt="Logo"></a>
             <ul>
                 <li><a href="studentinsert.php"><button type="button">ADD PARCEL</button></a></li>
                 <li><a href="studentupdate.php"><button type="button">EDIT PARCEL</button></a></li>
                 <li><button type="button">REMOVE</button></li>
-                <li><button type="button">SEARCH</button></li>
-                <li><button type="button">VIEWING</button></li>
+                <li><a href="viewPay.php"><button type="button">PAY</button></a></li>
+                <li><a href="parcellist.php"><button type="button">VIEWING</button></a></li>
                 <li><img class="image" src="../../pictures/home.png" alt="Home"></li>
             </ul>
         </div>

@@ -3,9 +3,10 @@ session_start();
 include ('../../config/config.php');
 
 // Check if the employee ID is stored in session
-if (isset($_SESSION['empUsername'])) {
-    $empUsername = $_SESSION['empUsername'];
+if (isset($_SESSION['empid'])) {
+    $empid = $_SESSION['empid'];
 
+    // Handle form submission
     if ($_SERVER['REQUEST_METHOD'] == "POST") {
         // Fetch POST data with null coalescing to avoid undefined array key warnings
         $trackingNumber = $_POST['trackingNumber'] ?? null;
@@ -53,22 +54,17 @@ if (isset($_SESSION['empUsername'])) {
 
         $stmt_check_parcel->close();
     }
-} else {
-    echo "<script type='text/javascript'>alert('No employee Username found in session. Please login again.');</script>";
 }
 ?>
-
-
-
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Employee Update</title>
+    <title>Employee Update Parcel</title>
     <style>
-        /* Basic reset */
+        /* General Reset and Typography */
         * {
             margin: 0;
             padding: 0;
@@ -76,24 +72,27 @@ if (isset($_SESSION['empUsername'])) {
         }
 
         body {
-            font-family: 'Poppins', sans-serif;
-            background-color: #BFACE2;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f5f5f5;
             color: #333;
             line-height: 1.6;
         }
 
-        /* Banner styling */
+        /* Banner and Navbar */
         .banner {
-            background: #645CBB;
+            background: #333;
             color: white;
             padding: 1rem 2rem;
             text-align: center;
             margin-bottom: 1rem;
+            border-bottom: 3px solid #222;
         }
 
         .banner h1 {
             margin-bottom: 0.5rem;
             font-size: 2rem;
+            font-weight: bold;
+            letter-spacing: 1px;
         }
 
         .navbar {
@@ -101,7 +100,8 @@ if (isset($_SESSION['empUsername'])) {
             justify-content: space-between;
             align-items: center;
             padding: 1rem 2rem;
-            background: #BFACE2;
+            background: #f5f5f5;
+            border-bottom: 1px solid #ddd;
         }
 
         .navbar img.logo {
@@ -117,17 +117,18 @@ if (isset($_SESSION['empUsername'])) {
         }
 
         .navbar ul button {
-            background: #645CBB;
+            background: #333;
             color: white;
             border: none;
             padding: 0.75rem 1.5rem;
             cursor: pointer;
             border-radius: 20px;
             font-size: 1rem;
+            transition: background 0.3s ease;
         }
 
         .navbar ul button:hover {
-            background: #524a99;
+            background: #222;
         }
 
         .navbar ul img.image {
@@ -135,7 +136,7 @@ if (isset($_SESSION['empUsername'])) {
             cursor: pointer;
         }
 
-        /* Form styling */
+        /* Form Container and Grid */
         .form-container {
             background-color: #fff;
             border-radius: 8px;
@@ -161,6 +162,7 @@ if (isset($_SESSION['empUsername'])) {
             margin-bottom: 0.5rem;
             font-size: 1rem;
             color: #333;
+            font-weight: bold;
         }
 
         .input-group input[type="text"],
@@ -170,14 +172,14 @@ if (isset($_SESSION['empUsername'])) {
             font-size: 1rem;
             border: 1px solid #ddd;
             border-radius: 4px;
-            background-color: #f9f9f9;
+            background-color: #f5f5f5;
             transition: border-color 0.3s ease;
         }
 
         .input-group input[type="text"]:focus,
         .input-group select:focus {
             outline: none;
-            border-color: #645CBB;
+            border-color: #333;
         }
 
         .submit-btn {
@@ -186,7 +188,7 @@ if (isset($_SESSION['empUsername'])) {
         }
 
         .submit-btn button {
-            background: #645CBB;
+            background: #333;
             color: white;
             border: none;
             padding: 0.75rem 2rem;
@@ -197,25 +199,24 @@ if (isset($_SESSION['empUsername'])) {
         }
 
         .submit-btn button:hover {
-            background: #524a99;
+            background: #222;
         }
     </style>
 </head>
 <body>
     <div class="banner">
-        <h1>Employee</h1>
         <div class="navbar">
-            <img class="logo" src="../../pictures/logoParcel.png" alt="Logo">
+            <a href="employeeupdate.php"><img class="logo" src="../../pictures/logoParcel.png" alt="Logo"></a>
             <ul>
                 <li><a href="employeeupdate.php"><button type="button">UPDATE</button></a></li>
                 <li><button type="button">REMOVE</button></li>
-                <li><button type="button">VIEWING</button></li>
-                <li><img class="image" src="../../pictures/home.png" alt="Home"></li>
+                <li><a href="../../pages/employee/studentslist.php">VIEWING</a></li>
+                <li><a href="employeehome.php"><img class="image" src="../../pictures/home.png" alt="Home"></a></li>
             </ul>
         </div>
     </div>
     <div class="form-container">
-        <form action="../../pages/employee/employeeupdate.php" method="post" class="form-grid">
+        <form action="employeeupdate.php" method="post" class="form-grid">
             <div class="input-group">
                 <label for="trackingNumber">Tracking Number :</label>
                 <input type="text" id="trackingNumber" name="trackingNumber" required>
