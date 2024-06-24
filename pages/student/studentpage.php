@@ -1,13 +1,32 @@
 <?php
-    include ('../../config/config.php');
-    session_start();
-    if ($_SERVER['REQUEST_METHOD'] == "POST") {
-        // Retrieve the logged-in studUsername from the session
-        if (!isset($_SESSION['studid'])) {
-            echo "<script type='text/javascript'>alert('Student Username is not set in the session');</script>";
-            exit();
-        }
+session_start();
+include ('../../config/config.php');
+
+// Check if the user is logged in
+if (!isset($_SESSION['studid'])) {
+    echo "<script type='text/javascript'>alert('student Username is not set in the session');</script>";
+    exit();
+}
+
+// Get the student ID from session
+$studid = $_SESSION['studid'];
+
+// Fetch the student details
+$sql = "SELECT * FROM student WHERE studid = '$studid'";
+$result = mysqli_query($con, $sql);
+$row = mysqli_fetch_assoc($result);
+
+// Process POST request if form is submitted
+if ($_SERVER['REQUEST_METHOD'] == "POST") {
+    // Ensure the student is still logged in
+    if (!isset($_SESSION['studid'])) {
+        echo "<script type='text/javascript'>alert('student Username is not set in the session');</script>";
+        exit();
     }
+
+    // You can add your form processing code here
+    // For example, handling form submissions or other POST request logic
+}
 ?>
 
 <!DOCTYPE html>
@@ -128,19 +147,70 @@
             font-size: 20px;
             color: #666;
         }
+        //for dropdown profile
+        .dropdown {
+            position: relative;
+            display: inline-block;
+            margin-left: -40%;
+        }
+
+        .dropdown img {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            cursor: pointer;
+            margin-left: -40%;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: #f9f9f9;
+            min-width: 160px;
+            box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+
+        }
+
+        .dropdown-content a {
+            color: black;
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+
+        }
+
+        .dropdown-content a:hover {
+            background-color: #f1f1f1;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+            margin-left: -7%;
+        }
     </style>
 </head>
 <body>
     <div class="navbar">
         <img class="logo" src="../../pictures/logoParcel.png" alt="Logo">
         <ul>
-            <li><a href="../../pages/student/studentinsert.php">INSERT</a></li>
-            <li><a href="../../pages/student/studentupdate.php">UPDATE</a></li>
-            <li><a href="#">REMOVE</a></li>
+            <li><a href="../../pages/student/studentinsert.php">ADD PARCEL</a></li>
+            <li><a href="../../pages/student/studentupdate.php">UPDATE PARCEL</a></li>
+            <li><a href="../../pages/student/studRemove.php">DELETE ACC</a></li>
             <li><a href="../../pages/student/viewPay.php">PAY</a></li>
             <li><a href="../../pages/student/parcellist.php">VIEWING</a></li>
         </ul>
         <img class="image" src="../../pictures/home.png" alt="Home">
+
+        <div class="dropdown">
+            <img src="<?php echo $row['ppStud']; ?>" alt="Avatar" class="student-pic">
+            <div class="dropdown-content">
+                <a href="#">Edit Profile</a>
+                <a href="#">Delete Account</a>
+                <a href="../../pages/other/logout.php">Logout</a>
+            </div>
+        </div>
+
     </div>
     <div class="content">
         <h1><img src="../../pictures/student icon.png" alt="Student Icon"> WELCOME TO STUDENT PAGE</h1>

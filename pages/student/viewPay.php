@@ -8,6 +8,14 @@ if (!isset($_SESSION['studid'])) {
     exit();
 }
 
+// Retrieve parcels from the database
+$query = "SELECT * FROM parcel WHERE studid = '".$_SESSION['studid']."' AND payStatus = 'UNPAID'";
+$result = mysqli_query($con, $query);
+$parcels = [];
+while ($row = mysqli_fetch_assoc($result)) {
+    $parcels[] = $row;
+}
+
 // Validate and sanitize page number
 $page = isset($_GET['page']) ? intval($_GET['page']) : 1;
 if ($page < 1) {
@@ -27,7 +35,7 @@ $search_query = isset($_GET['search']) ? mysqli_real_escape_string($con, $_GET['
 $studid = $_SESSION['studid'];
 
 if (!empty($search_query)) {
-    $total_query = "SELECT COUNT(*) AS total FROM parcel WHERE studid = '$studid' AND payStatus = 'UNPAID' AND (trackingNumber LIKE '%$search_query%' OR courname LIKE '%$search_query%' OR size LIKE '%$search_query%' OR status LIKE '%$search_query%')";
+    $total_query = "SELECT COUNT(*) AS total FROM parcel WHERE studid = '$studid' AND payStatus = 'UNPAID' AND (trackingNumber LIKE '%$search_query%' OR courname LIKE '%$search_query%' OR size LIKE '%$search_query%' OR status LIKE '%$search_query%' OR price LIKE '%$search_query%')";
 } else {
     $total_query = "SELECT COUNT(*) AS total FROM parcel WHERE studid = '$studid' AND payStatus = 'UNPAID'";
 }
@@ -41,9 +49,9 @@ $total_pages = ceil($total_records / $results_per_page);
 
 // Fetch data for current page for the logged-in user
 if (!empty($search_query)) {
-    $query = "SELECT trackingNumber, courname, size, status, payStatus FROM parcel WHERE studid = '$studid' AND payStatus = 'UNPAID' AND (trackingNumber LIKE '%$search_query%' OR courname LIKE '%$search_query%' OR size LIKE '%$search_query%' OR status LIKE '%$search_query%') LIMIT $start_from, $results_per_page";
+    $query = "SELECT trackingNumber, courname, size, status, payStatus, price FROM parcel WHERE studid = '$studid' AND payStatus = 'UNPAID' AND (trackingNumber LIKE '%$search_query%' OR courname LIKE '%$search_query%' OR size LIKE '%$search_query%' OR status LIKE '%$search_query%' OR price LIKE '%$search_query%') LIMIT $start_from, $results_per_page";
 } else {
-    $query = "SELECT trackingNumber, courname, size, status, payStatus FROM parcel WHERE studid = '$studid' AND payStatus = 'UNPAID' LIMIT $start_from, $results_per_page";
+    $query = "SELECT trackingNumber, courname, size, status, payStatus, price FROM parcel WHERE studid = '$studid' AND payStatus = 'UNPAID' LIMIT $start_from, $results_per_page";
 }
 
 $result = mysqli_query($con, $query);
@@ -55,7 +63,6 @@ $unpaidParcels = mysqli_fetch_all($result, MYSQLI_ASSOC);
 if (!$unpaidParcels) {
     echo "No unpaid parcels found for this user.";
 }
-
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -255,6 +262,7 @@ if (!$unpaidParcels) {
                             <th>Size</th>
                             <th>Status</th>
                             <th>Payment Status</th>
+                            <th>Price</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -262,7 +270,7 @@ if (!$unpaidParcels) {
                             <tr>
                                 <td>
                                     <div class="chip" onclick="toggleSelection(this)">
-                                        <input type="checkbox" name="parcels[]" value="<?php echo htmlspecialchars($parcel['trackingNumber']); ?>">
+                                        <input type="checkbox" name="parcel[]" value="<?php echo htmlspecialchars(json_encode($parcel)); ?>">
                                         Select
                                     </div>
                                 </td>
@@ -271,22 +279,27 @@ if (!$unpaidParcels) {
                                 <td><?php echo htmlspecialchars($parcel['size']); ?></td>
                                 <td><?php echo htmlspecialchars($parcel['status']); ?></td>
                                 <td><?php echo htmlspecialchars($parcel['payStatus']); ?></td>
+                                <td><?php echo htmlspecialchars($parcel['price']); ?></td>
                             </tr>
                         <?php endforeach; ?>
                     </tbody>
                 </table>
-                <button type="submit" class="pay-button">Pay Selected Parcels</button>
-                <ul class="pagination">
-                    <?php for ($i = 1; $i <= $total_pages; $i++) : ?>
-                        <li>
-                            <a href="viewPay.php?page=<?php echo $i; ?>&search=<?php echo htmlspecialchars($search_query); ?>"><?php echo $i; ?></a>
-                        </li>
-                    <?php endfor; ?>
-                </ul>
             <?php else : ?>
-                <p class="message">No unpaid parcels found.</p>
+                <div class="message">No unpaid parcels found.</div>
             <?php endif; ?>
+            <button type="submit" class="pay-button">Proceed to Payment</button>
         </form>
+        <div class="pagination">
+            <?php
+            for ($i = 1; $i <= $total_pages; $i++) {
+                if ($i == $page) {
+                    echo "<li><strong>$i</strong></li>";
+                } else {
+                    echo "<li><a href='viewPay.php?page=$i&search=" . urlencode($search_query) . "'>$i</a></li>";
+                }
+            }
+            ?>
+        </div>
     </div>
 </body>
 </html>

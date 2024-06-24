@@ -90,13 +90,16 @@
             session_start();
             include("../../config/config.php");
 
-            // Assuming the user is logged in and session is set, you can optionally check for it
+            // Assuming the user is logged in and session is set
             if (isset($_SESSION['studid'])) {
                 $studid = $_SESSION['studid'];
 
-                // Fetch the required parcel data from the database
-                $query = "SELECT trackingNumber, courname, size, status, payStatus FROM parcel";
-                $result = mysqli_query($con, $query);
+                // Fetch the required parcel data from the database for the logged-in student
+                $query = "SELECT trackingNumber, courname, size, status, payStatus FROM parcel WHERE studid = ?";
+                $stmt = mysqli_prepare($con, $query);
+                mysqli_stmt_bind_param($stmt, "i", $studid);
+                mysqli_stmt_execute($stmt);
+                $result = mysqli_stmt_get_result($stmt);
 
                 // Check if any rows were returned
                 if (mysqli_num_rows($result) > 0) {
@@ -117,6 +120,11 @@
                 } else {
                     echo '<p style="text-align: center; margin-top: 20px;">No parcels found.</p>';
                 }
+
+                // Close the statement
+                mysqli_stmt_close($stmt);
+            } else {
+                echo '<p style="text-align: center; margin-top: 20px;">You need to log in to view your parcels.</p>';
             }
             ?>
         </div>

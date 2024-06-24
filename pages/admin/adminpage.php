@@ -1,23 +1,34 @@
 <?php
-    session_start();
-    include ('../../config/config.php');
+session_start();
+include ('../../config/config.php');
 
-    if (!isset($_SESSION['studid'])) {
-    $adminid = $_SESSION['adminid'];
+// Check if the user is logged in
+if (!isset($_SESSION['adminid'])) {
+    echo "<script type='text/javascript'>alert('Admin Username is not set in the session');</script>";
+    exit();
+}
 
-    $sql = "SELECT * FROM admin WHERE adminid = '$adminid'";
-    $result = mysqli_query($con, $sql);
-    $row = mysqli_fetch_assoc($result);
+// Get the admin ID from session
+$adminid = $_SESSION['adminid'];
 
-    if ($_SERVER['REQUEST_METHOD'] == "POST") {
-        // Retrieve the logged-in studUsername from the session
-        if (!isset($_SESSION['adminid'])) {
-            echo "<script type='text/javascript'>alert('Admin Username is not set in the session');</script>";
-            exit();
-        }
+// Fetch the admin details
+$sql = "SELECT * FROM admin WHERE adminid = '$adminid'";
+$result = mysqli_query($con, $sql);
+$row = mysqli_fetch_assoc($result);
+
+// Process POST request if form is submitted
+if ($_SERVER['REQUEST_METHOD'] == "POST") {
+    // Ensure the admin is still logged in
+    if (!isset($_SESSION['adminid'])) {
+        echo "<script type='text/javascript'>alert('Admin Username is not set in the session');</script>";
+        exit();
     }
-    }
+
+    // You can add your form processing code here
+    // For example, handling form submissions or other POST request logic
+}
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -137,6 +148,7 @@
             font-size: 20px;
             color: #666;
         }
+        //for dropdown profile
         .dropdown {
             position: relative;
             display: inline-block;
@@ -158,6 +170,7 @@
             min-width: 160px;
             box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
             z-index: 1;
+
         }
 
         .dropdown-content a {
@@ -165,6 +178,7 @@
             padding: 12px 16px;
             text-decoration: none;
             display: block;
+
         }
 
         .dropdown-content a:hover {
@@ -173,6 +187,7 @@
 
         .dropdown:hover .dropdown-content {
             display: block;
+            margin-left: -7%;
         }
     </style>
 </head>
@@ -194,7 +209,8 @@
         <div class="dropdown">
             <img src="<?php echo $row['ppAdm']; ?>" alt="Avatar" class="admin-pic">
             <div class="dropdown-content">
-                <a href="adminupdate.php">Edit Profile</a>
+                <a href="#">Edit Profile</a>
+                <a href="#">Delete Account</a>
                 <a href="../../pages/other/logout.php">Logout</a>
             </div>
         </div>
